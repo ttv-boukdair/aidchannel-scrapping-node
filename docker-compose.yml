@@ -1,0 +1,42 @@
+version: '3.4'
+services:
+  aidchannel_scrapping_node:
+    image: registry.data4jobs.com/aidchannel_scrapping_node:latest
+    environment:
+      - PORT=80
+      - DB="mongodb://aidchannel:aidchannel_password123456@51.77.134.195:27028/aidchannel?authSource=aidchannel"
+      - PYSCRAP="https://news.jtsolution.org/tweets"
+    deploy:
+      labels:
+
+       - "traefik.http.routers.aidchannel-api.rule=Host(`aidchannelapiv0.data4jobs.com`)"
+       - "traefik.enable=true"
+       - "traefik.docker.network=public"  
+       - "traefik.http.routers.aidchannel-api.tls.certresolver=let"
+       - "traefik.http.routers.aidchannel-api.entrypoints=websecure"
+       - "traefik.http.services.aidchannel-api.loadbalancer.server.port=80"
+       
+       #- "traefik.http.routers.reformtracker-front.rule=Host(`reformtracker.org`)||Host(`reformtracker.net`)"
+      #  - "traefik.http.routers.aidchannel_front-front.rule=HostRegexp(`reformtracker.org`, `{subhost:[a-z]+}.reformtracker.org`)"
+      #  - "traefik.enable=true"
+      #  - "traefik.http.routers.aidchannel_front-front.tls=true"
+      #  - "traefik.http.routers.reformtracker-front.priority=30"
+      #  - "traefik.docker.network=public"  
+      #  - "traefik.http.routers.reformtracker-front.tls.certresolver=let"
+      #  - "traefik.http.routers.reformtracker-front.tls.domains[0].main=reformtracker.org"
+      #  - "traefik.http.routers.reformtracker-front.tls.domains[0].sans=demo.reformtracker.org,burundi.reformtracker.org,tanzania.reformtracker.org,uganda.reformtracker.org,kenya.reformtracker.org,rwanda.reformtracker.org,botswana.reformtracker.org,ecuador.reformtracker.org,malawi.reformtracker.org,namibia.reformtracker.org,zimbabwe.reformtracker.org,lesotho.reformtracker.org,zambia.reformtracker.org,madagascar.reformtracker.org,mongolia.reformtracker.org,honduras.reformtracker.org,bolivia.reformtracker.org,cambodia.reformtracker.org,eswatini.reformtracker.org"
+      #  - "traefik.http.routers.reformtracker-front.entrypoints=websecure"
+      #  - "traefik.http.services.reformtracker-front.loadbalancer.server.port=80"
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 20s
+    networks:
+      - public
+networks:
+    public:
+       external: true
+
+

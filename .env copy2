@@ -1,0 +1,4 @@
+PORT=3020
+DB="mongodb://aidchannel:aidchannel_password123456@51.77.134.195:27028/aidchannel?authSource=aidchannel"
+PYSCRAP="https://news.jtsolution.org/tweets"
+JWT_SECRET=awjohdadbahdgxg1222xakbxauhcua;
