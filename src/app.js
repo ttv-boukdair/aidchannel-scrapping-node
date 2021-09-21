@@ -102,9 +102,9 @@ app.use("/uploads", express.static("uploads"));
 //   CtrlIATI.scrapping();
 // });
 
-// if (CtrlIATI.interrupted) {
-//   CtrlIATI.scrapping();
-// }
+
+  // CtrlIATI.scrappingIATI();
+
 
 // if (await CtrlIATI.interrupted()) {
 // CtrlIATI.scrappingIATI();}
