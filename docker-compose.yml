@@ -9,12 +9,12 @@ services:
     deploy:
       labels:
 
-       - "traefik.http.routers.aidchannel-api.rule=Host(`aidchannelapiv0.data4jobs.com`)"
+       - "traefik.http.routers.aidchannel_scrapping_node.rule=Host(`aidchannelapiv0.data4jobs.com`)"
        - "traefik.enable=true"
        - "traefik.docker.network=public"  
-       - "traefik.http.routers.aidchannel-api.tls.certresolver=let"
-       - "traefik.http.routers.aidchannel-api.entrypoints=websecure"
-       - "traefik.http.services.aidchannel-api.loadbalancer.server.port=80"
+       - "traefik.http.routers.aidchannel_scrapping_node.tls.certresolver=let"
+       - "traefik.http.routers.aidchannel_scrapping_node.entrypoints=websecure"
+       - "traefik.http.services.aidchannel_scrapping_node.loadbalancer.server.port=80"
        
        #- "traefik.http.routers.reformtracker-front.rule=Host(`reformtracker.org`)||Host(`reformtracker.net`)"
       #  - "traefik.http.routers.aidchannel_front-front.rule=HostRegexp(`reformtracker.org`, `{subhost:[a-z]+}.reformtracker.org`)"
