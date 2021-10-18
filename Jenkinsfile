@@ -1,6 +1,9 @@
 node {
     def app
 
+     def  BRANCH_NAME="${env.BRANCH_NAME}"
+// test updates
+      if (BRANCH_NAME == "main") {
     stage('Clone repository') {
         /* Cloning the Repository to our Workspace */
         checkout scm
@@ -51,3 +54,6 @@ execCommand: "sudo docker stack deploy --compose-file /home/ubuntu/aidchannel/ai
       verbose: true)])
     }
 }
+ else{
+ echo "pre-prod oush nothing to do"
+ }}
