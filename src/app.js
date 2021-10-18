@@ -109,7 +109,10 @@ app.use("/uploads", express.static("uploads"));
 // if (await CtrlIATI.interrupted()) {
 // CtrlIATI.scrappingIATI();}
 
-// CtrlAFDB.putAFDBProjects();
+
+
+cron.schedule("19 00 * * 1", function () {
+CtrlAFDB.putAFDBProjects();}
 
 // CtrlUNDP.getUNDPProjects();
 // CtrlWB.getWBProjects();

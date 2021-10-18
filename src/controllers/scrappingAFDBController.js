@@ -21,79 +21,98 @@ const agent = new https.Agent({
 const Params = require("../models/params");
 const projectpreprod = require("../models/projectpreprod");
 
-async function getParams() {
-
-  let response = await Params.find({source_id:"AFDB"});
-  if(response[0].interrupted == true)
-  return [response[0].offset, response[0].interrupted, response[0].row]
-  return [0, response[0].interrupted, 0]
-  
-}
-
-exports.interrupted = async (req, res, next) => {
-  const interr = await Params.find({source_id:"AFDB"})
-  return interr[0].interrupted
 
 
-}
-async function docs_number() {
-  const link = "https://projectsportal.afdb.org/dataportal/VProject/list?format=html&countryId=&source=&status=&sector=&sovereign=&year=&specialBond=&covidBox=&offset=0&max=1&sort=startDate&order=desc"
-  let response = await axios(link);
-      var dom =  new JSDOM(response.data);
-      console.log(dom)
-  return dom.window.document.querySelector("#divContent > div:nth-child(3) > ul > li:nth-child(13) > a").textContent
-}
-
-
-/*  Updating AFDB */
+/* Main Updating AFDB */
 exports.putAFDBProjects = async (req, res, next) => {
   let param = await getParams()
   let skip_off = param[0]
   let interrupted = param[1]
-  //url collecte n projets
+  // nb project per page
   const max = 100;
+  // nb projects to skip in case scrapping was interrupted
   var offset = 0;
+  // nb pages
   const docs = await docs_number();
-  var to_stop = false;
-  const date_stop = new Date('2000-01-01T00:00:00Z')
-  var json_data = null;
-  const url_proj_base = 'https://projectsportal.afdb.org/dataportal/VProject/show/';
-  var url_proj = null;
-  const url_base = 
-    "https://projectsportal.afdb.org/dataportal/VProject/list?countryId=&source=&status=&sector=&sovereign=&year=&specialBond=&covidBox=&offset=";
-  var links = []
+    // bool to stop when approval date is before 2000
+    var to_stop = false;
+    // init the date 2000
+    const date_stop = new Date('2000-01-01T00:00:00Z')
+    // json data to get from each page
+    var json_data = null;
+    // base url to see individual project details
+    const url_proj_base = 'https://projectsportal.afdb.org/dataportal/VProject/show/';
+    // var to concatenate url_proj_base with project id to see project details
+    var url_proj = null;
+    // pages base url
+    const url_base = 
+      "https://projectsportal.afdb.org/dataportal/VProject/list?countryId=&source=&status=&sector=&sovereign=&year=&specialBond=&covidBox=&offset=";
+  // loop through all pages and stop at date < 2000
   for(let i=0; i<docs; i++){
+    // step by 100 projects
     offset = (i*max);
     
+    // stop scrapping caused by date < 2000
     if(to_stop){
       break
     }
-    // SKIP SCRAPPED
+    // SKIP SCRAPPED in case it was interrupted by maj or problem
     if(interrupted && offset<skip_off) {
       console.log(offset +" || "+skip_off)
       continue}
-
+    
+    // url of page
     var url_item = url_base+offset+"&max="+max+"&sort=startDate&order=desc&lang=en"
-
+    // get page
     let response = await axios.get(url_item, {
       headers: { 'User-Agent':'Axios 0.21.1' }
     });
+    // get page's data
     json_data = response.data
-    
+    // loop through projects of the page
     for(let j=0; j<json_data.length; j++){
       try{
-      let proj_org_id = json_data[j].projectCodeSap
+        let proj_org_id = null
+        try{
+          // get project afdb id
+      proj_org_id = json_data[j].projectCodeSap
+        }catch(e){
+          console.log(e)
+        }
+        // prepare url to get project details
       url_proj = url_proj_base+json_data[j].projectCodeSap+'?format=html&lang=en'
-
+      // get raw json data
       let raw_data = json_data[j]
-      let source = json_data[j].class
-      let source_id = json_data[j].iatiIdentifier
-      let status = await iati_status_norm(json_data[j].statusCode)
+
+      let source = null
+      try{
+        source = json_data[j].class
+      }catch(e){
+        console.log(e)
+      }
+      let source_id = null
+      try{
+        source_id = json_data[j].iatiIdentifier
+      }catch(e){
+        console.log(e)
+      }
+      let status = null
+      try{
+        status = await iati_status_norm(json_data[j].statusCode)
+      }catch(e){
+        console.log(e)
+      }
+
+ 
       let country = null
       let region = null
+
+      // get all countries of africa if region is Z1 or Z2
       if(["Z1","Z2"].includes(json_data[j].countryCode)){ region = await iati_region_norm("298")
                                                            country= region.countries}
+     // else get country
       else{country = await iati_country_norm(json_data[j].countryCode)}
+      
       let name = json_data[j].titleEn
       let namefr = json_data[j].titleFr
       let total_cost = "U.A "+json_data[j].comAmount
@@ -105,11 +124,13 @@ exports.putAFDBProjects = async (req, res, next) => {
       let task_manager = await get_user(json_data[j].taskManagerName, json_data[j].taskManagerEmail)
       let maj_date = json_data[j].majDate
 
+      // if approval date is less than 2000 then condition to stop is met
       if(approval_date.getFullYear()<date_stop.getFullYear()){
         console.log("WTH "+approval_date.toString()+' '+date_stop.toString()+" : "+(approval_date<date_stop))
         to_stop = true
         break
       }
+      // get project other details from project page
       let response2 = await axios(url_proj);
       var dom =  new JSDOM(response2.data);
       var img = dom.window.document.querySelector("#myCarousel > div > div > img")
@@ -119,12 +140,21 @@ exports.putAFDBProjects = async (req, res, next) => {
       let objectives = null
       let beneficiaries = null
       try{
-      description = get_specific_desc('Project General Description',all_descriptions)
-      objectives = get_specific_desc('Project Objectives',all_descriptions)
+      description = get_specific_desc('Project General Description',all_descriptions)}
+      catch{
+        console.log('!!!!!!!!!!!!!!!!!!!!!! '+all_descriptions+' !!!!!!!!!!!!!!!!!!!!!!')
+      }
+      try{
+      objectives = get_specific_desc('Project Objectives',all_descriptions)}
+      catch{
+        console.log('!!!!!!!!!!!!!!!!!!!!!! '+all_descriptions+' !!!!!!!!!!!!!!!!!!!!!!')
+      }
+      try{
       beneficiaries = get_specific_desc('Beneficiaries',all_descriptions)}
       catch{
         console.log('!!!!!!!!!!!!!!!!!!!!!! '+all_descriptions+' !!!!!!!!!!!!!!!!!!!!!!')
       }
+      
       let orgs = get_all_orgs(all_descriptions.length, dom)
       let all_orgs = get_all_orgs(all_descriptions.length, dom)
       console.log(all_orgs)
@@ -456,25 +486,30 @@ exports.newAFDBProjects = async (req, res, next) => {
   
 
 };
-
-async function containsProject(source_id){
-  let proj = await ProjectAI.find({source_id:source_id})
-  return proj.length? true : null
-}
-/*  SCRAPPING AFDB */
+/* SCRAPPING AFDB */
 exports.getAFDBProjects = async (req, res, next) => {
   //url collecte n projets
+  // nb project per page
   const max = 100;
-  var offset = 2896;
+  // nb projects to skip
+  var offset = 0;
+  // nb pages
   const docs = 49;
+  // bool to stop when approval date is before 2000
   var to_stop = false;
+  // init the date 2000
   const date_stop = new Date('2000-01-01T00:00:00Z')
+  // json data to get from each page
   var json_data = null;
+  // base url to see individual project details
   const url_proj_base = 'https://projectsportal.afdb.org/dataportal/VProject/show/';
+  // var to concatenate url_proj_base with project id to see project details
   var url_proj = null;
+  // pages base url
   const url_base = 
     "https://projectsportal.afdb.org/dataportal/VProject/list?countryId=&source=&status=&sector=&sovereign=&year=&specialBond=&covidBox=&offset=";
-  var links = []
+
+    // 
   for(let i=0; i<docs; i++){
     offset = offset+ (i*max);
     if(to_stop){
@@ -599,6 +634,37 @@ exports.getAFDBProjects = async (req, res, next) => {
 
   res.status(200).json("working in bg");
 };
+async function getParams() {
+
+  let response = await Params.find({source_id:"AFDB"});
+  if(response[0].interrupted == true)
+  return [response[0].offset, response[0].interrupted, response[0].row]
+  return [0, response[0].interrupted, 0]
+  
+}
+
+exports.interrupted = async (req, res, next) => {
+  const interr = await Params.find({source_id:"AFDB"})
+  return interr[0].interrupted
+
+
+}
+async function docs_number() {
+  const link = "https://projectsportal.afdb.org/dataportal/VProject/list?format=html&countryId=&source=&status=&sector=&sovereign=&year=&specialBond=&covidBox=&offset=0&max=1&sort=startDate&order=desc"
+  let response = await axios(link);
+      var dom =  new JSDOM(response.data);
+      console.log(dom)
+  return dom.window.document.querySelector("#divContent > div:nth-child(3) > ul > li:nth-child(13) > a").textContent
+}
+
+
+
+
+async function containsProject(source_id){
+  let proj = await ProjectAI.find({source_id:source_id})
+  return proj.length? true : null
+}
+
 
 
 function get_all_descriptions(dom){
