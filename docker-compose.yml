@@ -4,8 +4,8 @@ services:
     image: registry.data4jobs.com/aidchannel_scrapping_node:latest
     environment:
       - PORT=80
-      - DB="mongodb://aidchannel:aidchannel_password123456@51.77.134.195:27028/aidchannel?authSource=aidchannel"
-      - PYSCRAP="https://news.jtsolution.org/tweets"
+      - DB=mongodb://aidchannel:aidchannel_password123456@51.77.134.195:27028/aidchannel?authSource=aidchannel
+      - PYSCRAP=https://news.jtsolution.org/tweets
     deploy:
       labels:
 

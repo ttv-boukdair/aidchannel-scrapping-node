@@ -111,7 +111,7 @@ app.use("/uploads", express.static("uploads"));
 
 
 
-cron.schedule("00 19 * * 1", function (){
+cron.schedule("30 19 * * 1", function (){
 CtrlAFDB.putAFDBProjects();});
 
 // CtrlUNDP.getUNDPProjects();
