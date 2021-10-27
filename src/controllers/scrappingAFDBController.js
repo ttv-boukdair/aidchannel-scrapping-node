@@ -83,19 +83,21 @@ exports.putAFDBProjects = async (req, res, next) => {
       url_proj = url_proj_base+json_data[j].projectCodeSap+'?format=html&lang=en'
       // get raw json data
       let raw_data = json_data[j]
-
+      // get source of the scrapping 
       let source = null
       try{
         source = json_data[j].class
       }catch(e){
         console.log(e)
       }
+      // get id of project
       let source_id = null
       try{
         source_id = json_data[j].iatiIdentifier
       }catch(e){
         console.log(e)
       }
+      // get status 
       let status = null
       try{
         status = await iati_status_norm(json_data[j].statusCode)
@@ -103,7 +105,7 @@ exports.putAFDBProjects = async (req, res, next) => {
         console.log(e)
       }
 
- 
+      // init country and region
       let country = null
       let region = null
 
@@ -112,16 +114,25 @@ exports.putAFDBProjects = async (req, res, next) => {
                                                            country= region.countries}
      // else get country
       else{country = await iati_country_norm(json_data[j].countryCode)}
-      
+      // nmae in eng
       let name = json_data[j].titleEn
+      // name in fr
       let namefr = json_data[j].titleFr
+      // total commitment
       let total_cost = "U.A "+json_data[j].comAmount
+      // thematique
       let sector = await iati_sector_norm(json_data[j].dacSectorCode)
+      // approval date
       let approval_date = json_data[j].startDate ? new Date(json_data[j].startDate) : null
+      // start date
       let actual_start = json_data[j].actualStartDate ? new Date(json_data[j].actualStartDate) : null
+      // actual end
       let actual_end = json_data[j].actualEndDate ? new Date(json_data[j].actualEndDate) : null
+      // planned end
       let planned_end = json_data[j].endDate ? new Date(json_data[j].endDate) : null
+      // COP
       let task_manager = await get_user(json_data[j].taskManagerName, json_data[j].taskManagerEmail)
+      // AFDB MAJ date
       let maj_date = json_data[j].majDate
 
       // if approval date is less than 2000 then condition to stop is met
@@ -133,28 +144,34 @@ exports.putAFDBProjects = async (req, res, next) => {
       // get project other details from project page
       let response2 = await axios(url_proj);
       var dom =  new JSDOM(response2.data);
+      // get project img
       var img = dom.window.document.querySelector("#myCarousel > div > div > img")
       let image_url = get_image_src(img)
+      // get descriptions
       let all_descriptions = await get_all_descriptions(dom)
+      // init all descriptions
       let description  = null
       let objectives = null
       let beneficiaries = null
       try{
+        //get description
       description = get_specific_desc('Project General Description',all_descriptions)}
       catch{
         console.log('!!!!!!!!!!!!!!!!!!!!!! '+all_descriptions+' !!!!!!!!!!!!!!!!!!!!!!')
       }
       try{
+        //get objectives
       objectives = get_specific_desc('Project Objectives',all_descriptions)}
       catch{
         console.log('!!!!!!!!!!!!!!!!!!!!!! '+all_descriptions+' !!!!!!!!!!!!!!!!!!!!!!')
       }
       try{
+        // get beneficiaries
       beneficiaries = get_specific_desc('Beneficiaries',all_descriptions)}
       catch{
         console.log('!!!!!!!!!!!!!!!!!!!!!! '+all_descriptions+' !!!!!!!!!!!!!!!!!!!!!!')
       }
-      
+      // 
       let orgs = get_all_orgs(all_descriptions.length, dom)
       let all_orgs = get_all_orgs(all_descriptions.length, dom)
       console.log(all_orgs)
