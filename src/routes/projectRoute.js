@@ -7,6 +7,12 @@ router.get(
   "/projectsOfMonthByThematic/:id/:codeCountry",
   projectpreprodCtrl.getAllProjectsOfMonthByThematic
 );
+
+router.get(
+  "/add-project-url",
+  projectpreprodCtrl.add_project_url
+);
+
 router.get("/numberProjects", projectpreprodCtrl.getNumberAllProjects);
 router.get(
   "/projectsOfMonthByDonors/:idOrg/:codeCountry",
