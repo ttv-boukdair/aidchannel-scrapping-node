@@ -7,7 +7,6 @@ var Status = require("../models/status");
 var Countries = require("../models/country");
 var Thematiques = require("../models/thematiques");
 const { JSDOM } = jsdom;
-var ProjectAI = require("../models/projectai");
 var SectorsDATA = require("../data/sectors.json");
 var africa_regionsDATA = require("../data/africa_regions.json");
 const { json } = require("body-parser");
@@ -19,7 +18,6 @@ const agent = new https.Agent({
   rejectUnauthorized: false
 });
 const Params = require("../models/params");
-const projectpreprod = require("../models/projectpreprod");
 
 
 
@@ -187,7 +185,7 @@ exports.putAFDBProjects = async (req, res, next) => {
       if(await containsProject(source_id)){
         if(country.length>0){
           for(let c = 0; c < country.length; c++){
-         let project_to_update = await ProjectAI.find({source_id: source_id, country:country[c]})
+         let project_to_update = await Projectpreprod.find({source_id: source_id, country:country[c]})
          
          project_to_update = project_to_update[0]
          project_to_update.source=source
@@ -221,7 +219,7 @@ exports.putAFDBProjects = async (req, res, next) => {
         console.log(project_to_update+"\nUPDATE")}
       }
         else{
-          let project_to_update = await ProjectAI.find({source_id: source_id})
+          let project_to_update = await Projectpreprod.find({source_id: source_id})
           
           project_to_update = project_to_update[0]
           project_to_update.source=source
@@ -257,7 +255,7 @@ exports.putAFDBProjects = async (req, res, next) => {
       if(country.length>0){
       for(let c = 0; c < country.length; c++){
        
-      const project_to_save = new ProjectAI({
+      const project_to_save = new Projectpreprod({
         source:source,
         source_id: source_id,
         proj_org_id: proj_org_id,
@@ -289,7 +287,7 @@ exports.putAFDBProjects = async (req, res, next) => {
      project_to_save.save()
     }}
     else{
-      const project_to_save = new ProjectAI({
+      const project_to_save = new Projectpreprod({
         source:source,
         source_id: source_id,
         proj_org_id: proj_org_id,
@@ -337,104 +335,178 @@ exports.putAFDBProjects = async (req, res, next) => {
 };
 
 
+
+
 /* NEW AFDB Prjects */
 exports.newAFDBProjects = async (req, res, next) => {
 
   //url collecte n projets
   const max = 100;
+  //offset skips the specified number of projects
   var offset = 0;
+  // total number of pages
   const docs = await docs_number();
+  //bool value to stop external loop
   var to_stop = false;
+  //limit scrapping to no earlier than this date
   const date_stop = new Date('2000-01-01T00:00:00Z')
+  //jason_data of n projects scrapped from AFDB page
   var json_data = null;
+  // Individual project page Base url
   const url_proj_base = 'https://projectsportal.afdb.org/dataportal/VProject/show/';
+  //Full Individual project page : url_proj_base + project_afdb_code
   var url_proj = null;
+  //n projects Base url
   const url_base = 
     "https://projectsportal.afdb.org/dataportal/VProject/list?countryId=&source=&status=&sector=&sovereign=&year=&specialBond=&covidBox=&offset=";
-  var links = []
+ 
+    // loop through all pages each of n projects
   for(let i=0; i<docs; i++){
+    //number of projects to skip
     offset = offset+ (i*max);
+
+    //if a stopping condition is met in the internal loop the to_stop value will be true and this condition below will allow to break this external loop
     if(to_stop){
       break
     }
 
+    //contruct page url with n projects
     var url_item = url_base+offset+"&max="+max+"&sort=startDate&order=desc&lang=en"
-
+    
+    //get the n projects in json list (without image, orgs, or any descriptions)
     let response = await axios.get(url_item, {
       headers: { 'User-Agent':'Axios 0.21.1' }
     });
     json_data = response.data
     
+    //loop through the n projects in json list
     for(let j=0; j<json_data.length; j++){
+
+      // collecte AFDB project code
       let proj_org_id = json_data[j].projectCodeSap
+
+      // form the individual project url
       url_proj = url_proj_base+json_data[j].projectCodeSap+'?format=html&lang=en'
 
+      // raw data field (add first the already available json data, other data like image or desc are added later after getting them from the indvivdual project page)
       let raw_data = json_data[j]
+
+      //afdb protal website source
       let source = json_data[j].class
+
+      //iati id
       let source_id = json_data[j].iatiIdentifier
+
+      // project status
       let status = await iati_status_norm(json_data[j].statusCode)
+
+      //country and/or region (region is used if country doesn't exist to duplicate projects on said region)
       let country = null
       let region = null
+      //if it is a region code the countries of the region are added to the country
       if(["Z1","Z2"].includes(json_data[j].countryCode)){ region = await iati_region_norm("298")
                                                            country= region.countries}
+      //else the country is simply collected by uts code
       else{country = await iati_country_norm(json_data[j].countryCode)}
+
+      //project name in en and fr
       let name = json_data[j].titleEn
       let namefr = json_data[j].titleFr
+
+      //total cost of the project
       let total_cost = "U.A "+json_data[j].comAmount
+
+      //thematique of the project
       let sector = await iati_sector_norm(json_data[j].dacSectorCode)
+
+      //all dates types
       let approval_date = json_data[j].startDate ? new Date(json_data[j].startDate) : null
       let actual_start = json_data[j].actualStartDate ? new Date(json_data[j].actualStartDate) : null
       let actual_end = json_data[j].actualEndDate ? new Date(json_data[j].actualEndDate) : null
       let planned_end = json_data[j].endDate ? new Date(json_data[j].endDate) : null
+
+      //task manager (COP) info, if they exists get them else create and get them
       let task_manager = await get_user(json_data[j].taskManagerName, json_data[j].taskManagerEmail)
+
+      //MAJ date of the project in AFDB database
       let maj_date = json_data[j].majDate
 
+      //if the date is earlier than the limit date_stop, if so set to_stop to true and break 
       if(approval_date.getFullYear()<date_stop.getFullYear()){
         console.log("WTH "+approval_date.toString()+' '+date_stop.toString()+" : "+(approval_date<date_stop))
         to_stop = true
         break
       }
+
+      //get individual project page
       let response2 = await axios(url_proj);
+
+      //parse the page to navigate it
       var dom =  new JSDOM(response2.data);
+
+      //get image tag
       var img = dom.window.document.querySelector("#myCarousel > div > div > img")
+      //get url from img tag
       let image_url = get_image_src(img)
+
+      //get description, onjectives, and beneficiaries
       let all_descriptions = await get_all_descriptions(dom)
       let description  = null
       let objectives = null
       let beneficiaries = null
+
       try{
-      description = get_specific_desc('Project General Description',all_descriptions)
-      objectives = get_specific_desc('Project Objectives',all_descriptions)
+        //fetch and get description
+      description = get_specific_desc('Project General Description',all_descriptions)}
+      catch{
+        console.log('!!!!!!!!!!!!!!!!!!!!!! '+all_descriptions+' !!!!!!!!!!!!!!!!!!!!!!')
+      }
+      try{
+        //fetch and get objectives
+      objectives = get_specific_desc('Project Objectives',all_descriptions)}
+      catch{
+        console.log('!!!!!!!!!!!!!!!!!!!!!! '+all_descriptions+' !!!!!!!!!!!!!!!!!!!!!!')
+      }
+      try{
+        //fetch and get beneficiaries
       beneficiaries = get_specific_desc('Beneficiaries',all_descriptions)}
       catch{
         console.log('!!!!!!!!!!!!!!!!!!!!!! '+all_descriptions+' !!!!!!!!!!!!!!!!!!!!!!')
       }
+      //add all descriptions to raw data
+      raw_data.descriptions = all_descriptions
+
+      //get involved orgs
       let orgs = get_all_orgs(all_descriptions.length, dom)
-      let all_orgs = get_all_orgs(all_descriptions.length, dom)
-      console.log(all_orgs)
-      raw_data['orgs']=all_orgs
+      // funder/implementer and sub_funder/sub_implementer
       let funder = await getFunder(orgs)
       let implementer = await getImplementer(orgs)
       let sub_funder = await getSubFunder(orgs, funder)
       let sub_implementer = await getSubImplementer(orgs, implementer)
-      
+      //add involved orgs to raw data
+      raw_data['orgs']=get_all_orgs(all_descriptions.length, dom)
+      //if the name in english does not exit and only the name in french does
       let translate_name= name ? false : true
-      
-      raw_data.descriptions = all_descriptions
+
+      //check if project already exists
       let proj_exist =await containsProject(source_id)
-      console.log(proj_exist)
+      //if so, set to_stop to true and break
       if(proj_exist){
           console.log("DONE !!!!!!!!!!!!!!!!!!")
           to_stop =true
           break
       }
+      //else add project
       else{
+      //if project is regional then we have muti-country and need to add the project to each one
       if(country.length>0){
+      //loop through all countries
       for(let c = 0; c < country.length; c++){
-       
-      const project_to_save = new ProjectAI({
+       //add project to each country
+      const project_to_save = new Projectpreprod({
         source:source,
         source_id: source_id,
+        project_url:url_proj,
         proj_org_id: proj_org_id,
         name: name,
         namefr:namefr,
@@ -464,9 +536,11 @@ exports.newAFDBProjects = async (req, res, next) => {
      project_to_save.save()
     }}
     else{
-      const project_to_save = new ProjectAI({
+      //if the project is not regional simply add it with its country 
+      const project_to_save = new Projectpreprod({
         source:source,
         source_id: source_id,
+        project_url:url_proj,
         proj_org_id: proj_org_id,
         name: name,
         namefr:namefr,
@@ -496,8 +570,6 @@ exports.newAFDBProjects = async (req, res, next) => {
     }
     }}
     
-    //console.log(response.data)
-    //console.log(response2.data)
     
   }
   
@@ -586,7 +658,7 @@ exports.getAFDBProjects = async (req, res, next) => {
       let translate_name= name ? false : true
       if(country.length>0){
       for(let c = 0; c < country.length; c++){
-      const project_to_save = new ProjectAI({
+      const project_to_save = new Projectpreprod({
         source:source,
         source_id: source_id,
         name: name,
@@ -614,7 +686,7 @@ exports.getAFDBProjects = async (req, res, next) => {
      // project_to_save.save()
     }}
     else{
-      const project_to_save = new ProjectAI({
+      const project_to_save = new Projectpreprod({
         source:source,
         source_id: source_id,
         name: name,
@@ -678,7 +750,7 @@ async function docs_number() {
 
 
 async function containsProject(source_id){
-  let proj = await ProjectAI.find({source_id:source_id})
+  let proj = await Projectpreprod.find({source_id:source_id})
   return proj.length? true : null
 }
 

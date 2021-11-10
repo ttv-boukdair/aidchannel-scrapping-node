@@ -109,8 +109,7 @@ app.use("/uploads", express.static("uploads"));
 // if (await CtrlIATI.interrupted()) {
 // CtrlIATI.scrappingIATI();}
 
-
-
+// CtrlAFDB.newAFDBProjects()
 // cron.schedule("30 19 * * 1", function (){
 // CtrlAFDB.putAFDBProjects();});
 

@@ -3,6 +3,9 @@ const projectpreprodSchema = mongoose.Schema({
   source: {
     type: String,
   },
+  project_url: {
+    type: String,
+  },
   source_id: {
     type: String,
   },
