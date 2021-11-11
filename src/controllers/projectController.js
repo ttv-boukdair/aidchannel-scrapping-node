@@ -37,6 +37,22 @@ exports.add_project_url = async (req, res, next) => {
     console.log(i)
 
   }
+
+  let giz_base = "https://www.giz.de/projektdaten/exportDetail.action?documentId="
+  let giz_suff = "&infotypeSource=projects"
+
+  // projects.worldbank.org
+  console.log("start giz")
+  let projs3 = await Project.find({source:"giz.de/projektdaten", proj_org_id:{$nin:[null]}}).select({_id:1, proj_org_id:1,project_url:1});
+  console.log(projs3.length)
+  for(let i=0;i<projs3.length;i++){
+    if(projs3[i].project_url==null || true){
+    let up =await Project.updateOne({_id:projs3[i]._id},{$set:{project_url:giz_base+projs3[i].proj_org_id.replace(/\./g,'')+giz_suff}})
+    console.log(up)}
+    console.log(i)
+
+  }
+
   res.status(200).json("done");
 };
 
