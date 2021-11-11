@@ -116,6 +116,7 @@ app.use("/uploads", express.static("uploads"));
 // CtrlUNDP.getUNDPProjects();
 // CtrlWB.getWBProjects();
 // CtrlGIZ.getProjects();
+// CtrlGIZ.newProjects()
 
 // cron.schedule("00 00 * * *", function () {
 //   console.log("update");

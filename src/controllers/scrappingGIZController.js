@@ -23,11 +23,13 @@ function sleep(ms) {
 
 
 async function getProjectInfo(index) {
-
+    //base url to get projects
     var url = "https://www.giz.de/projektdaten/region/-1/countries";
+    //init and lunch puppeteer browser
     var browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     var page = (await browser.pages())[0];
     page.setDefaultNavigationTimeout(0);
+    // go to link
     await page.goto(url, { waitUntil: 'networkidle2' });
 
     // flow to list projects & create session to access project
@@ -36,64 +38,65 @@ async function getProjectInfo(index) {
     await page.click(".ng-dropdown-panel.ng-select-multiple.ng-select-bottom > div > div:nth-child(2) > div:nth-child(1)", { waitUntil: 'networkidle2' });
     await sleep(5000);
 
-    // open project page in new tab
+    // open project page in new tab to get it as text
     var projectTab = await browser.newPage();
     const projectUrl = "https://www.giz.de/projektdaten/projects.action?submitAction=details&target=projects&infotypeSource=pbsprojekte&documentId=" + index + "&request_locale=en_GB&position=2";
     await projectTab.goto(projectUrl, { waitUntil: 'networkidle2' });
 
+
     let data = await projectTab.evaluate(() => {
 
         // project details
-        const title = document.querySelector(".titel-box h1:nth-child(2)").innerText;
-        const projectNumber = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(1) > span").innerText;
-        const status = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(2) > span").innerText;
-        const responsible = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(3) > span").innerText;
-        const contact = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(4) > span").innerText;
-        const partnerCountries = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(5) > span").innerText;
+        const title = document.querySelector(".titel-box h1:nth-child(2)")? document.querySelector(".titel-box h1:nth-child(2)").innerText:null;
+        const projectNumber = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(1) > span")?document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(1) > span").innerText:null;
+        const status = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(2) > span")?document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(2) > span").innerText:null;
+        const responsible = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(3) > span")?document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(3) > span").innerText:null;
+        const contact = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(4) > span")?document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(4) > span").innerText:null;
+        const partnerCountries = document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(5) > span")?document.querySelector("#pbs > div > div:nth-child(2) > div:nth-child(1) > ul > li:nth-child(5) > span").innerText:null;
 
         //Summary
-        const objectives = document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(1) > p").innerText;
-        const client = document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(2) > p").innerText;
-        const projectPartner = document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(3) > p").innerText;
-        const financingOrganization = document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(4) > p").innerText;
+        const objectives = document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(1) > p")?document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(1) > p").innerText:null;
+        const client = document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(2) > p")?document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(2) > p").innerText:null;
+        const projectPartner = document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(3) > p")?document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(3) > p").innerText:null;
+        const financingOrganization = document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(4) > p")?document.querySelector("#pbs > div > div:nth-child(2) > div.halbe-breite.rechts-ausgerichtet > ul > li:nth-child(4) > p").innerText:null;
 
-        // project value
-        const totalFinancialCommitment = document.querySelector("#pbs > div > div:nth-child(4) > div:nth-child(1) > ul > li:nth-child(1) > div > span").innerText;
-        const projectFinancialCommitment = document.querySelector("#pbs > div > div:nth-child(4) > div:nth-child(1) > ul > li:nth-child(2) > div > span").innerText;
+        // project cost
+        const totalFinancialCommitment = document.querySelector("#pbs > div > div:nth-child(4) > div:nth-child(1) > ul > li:nth-child(1) > div > span")?document.querySelector("#pbs > div > div:nth-child(4) > div:nth-child(1) > ul > li:nth-child(1) > div > span").innerText:null;
+        const projectFinancialCommitment = document.querySelector("#pbs > div > div:nth-child(4) > div:nth-child(1) > ul > li:nth-child(2) > div > span")?document.querySelector("#pbs > div > div:nth-child(4) > div:nth-child(1) > ul > li:nth-child(2) > div > span").innerText:null;
 
         // co-financing
         const cofinancersText = [];
-        const cofinancers = document.querySelectorAll("#pbs > div > div:nth-child(4) > div.halbe-breite.rechts-ausgerichtet > ul > li > p");
+        const cofinancers = document.querySelectorAll("#pbs > div > div:nth-child(4) > div.halbe-breite.rechts-ausgerichtet > ul > li > p")?document.querySelectorAll("#pbs > div > div:nth-child(4) > div.halbe-breite.rechts-ausgerichtet > ul > li > p"):[];
         for (let i = 0; i < cofinancers.length; i++) { cofinancersText.push(cofinancers[i].innerText) };
 
         // previous projects
         const prevProjectsText = [];
-        const prevProjects = document.querySelectorAll("#pbs > div > div:nth-child(6) > div:nth-child(1) > ul > li")
+        const prevProjects = document.querySelectorAll("#pbs > div > div:nth-child(6) > div:nth-child(1) > ul > li")?document.querySelectorAll("#pbs > div > div:nth-child(6) > div:nth-child(1) > ul > li"):[]
         for (let i = 0; i < prevProjects.length; i++) { prevProjectsText.push(prevProjects[i].innerText) };
 
         // follow-on projects
         const followOnProjectsText = [];
-        const followOnProjects = document.querySelectorAll("#pbs > div > div:nth-child(6) > div.halbe-breite.rechts-ausgerichtet > ul > li");
+        const followOnProjects = document.querySelectorAll("#pbs > div > div:nth-child(6) > div.halbe-breite.rechts-ausgerichtet > ul > li")?document.querySelectorAll("#pbs > div > div:nth-child(6) > div.halbe-breite.rechts-ausgerichtet > ul > li"):[]
         for (let i = 0; i < followOnProjects.length; i++) { followOnProjectsText.push(followOnProjects[i].innerText) };
 
         // term
-        const entireProjectDate = document.querySelector("#pbs > div > div:nth-child(8) > div:nth-child(1) > ul > li:nth-child(1) > div > span").innerText;
-        const actualProjectDate = document.querySelector("#pbs > div > div:nth-child(8) > div:nth-child(1) > ul > li:nth-child(2) > div > span").innerText;
+        const entireProjectDate = document.querySelector("#pbs > div > div:nth-child(8) > div:nth-child(1) > ul > li:nth-child(1) > div > span")?document.querySelector("#pbs > div > div:nth-child(8) > div:nth-child(1) > ul > li:nth-child(1) > div > span").innerText:null;
+        const actualProjectDate = document.querySelector("#pbs > div > div:nth-child(8) > div:nth-child(1) > ul > li:nth-child(2) > div > span")?document.querySelector("#pbs > div > div:nth-child(8) > div:nth-child(1) > ul > li:nth-child(2) > div > span").innerText:null;
 
         // other participants
         const otherParticipantsText = [];
-        const otherParticipants = document.querySelectorAll("#pbs > div > div:nth-child(8) > div.halbe-breite.rechts-ausgerichtet > ul > li");
+        const otherParticipants = document.querySelectorAll("#pbs > div > div:nth-child(8) > div.halbe-breite.rechts-ausgerichtet > ul > li")?document.querySelectorAll("#pbs > div > div:nth-child(8) > div.halbe-breite.rechts-ausgerichtet > ul > li"):[];
         for (let i = 0; i < otherParticipants.length; i++) { otherParticipantsText.push(otherParticipants[i].innerText) };
 
-        const projectWebsites = document.querySelector("#pbs > div > div:nth-child(10) > div > ul > li > span").innerText;
+        const projectWebsites = document.querySelector("#pbs > div > div:nth-child(10) > div > ul > li > span")?document.querySelector("#pbs > div > div:nth-child(10) > div > ul > li > span").innerText:null;
 
         // policy markers list
-        const policyMarkersList = document.querySelectorAll("#pbs > div > div:nth-child(12) > div:nth-child(1) > ul > li");
+        const policyMarkersList = document.querySelectorAll("#pbs > div > div:nth-child(12) > div:nth-child(1) > ul > li")?document.querySelectorAll("#pbs > div > div:nth-child(12) > div:nth-child(1) > ul > li"):[];
         const policyMarkers = [];
         for (let i = 0; i < policyMarkersList.length; i++) { policyMarkers.push(policyMarkersList[i].innerText) };
 
         // crs code
-        const crsCode = document.querySelector("#pbs > div > div:nth-child(12) > div.halbe-breite.rechts-ausgerichtet > ul > li > span").innerText;
+        const crsCode = document.querySelector("#pbs > div > div:nth-child(12) > div.halbe-breite.rechts-ausgerichtet > ul > li > span")?document.querySelector("#pbs > div > div:nth-child(12) > div.halbe-breite.rechts-ausgerichtet > ul > li > span").innerText:null;
         //  description
         try {
             var description = document.querySelector("#pbs > div > div:nth-child(16) > div > span > p").innerText;
@@ -101,6 +104,8 @@ async function getProjectInfo(index) {
             var description = "";
         }
 
+    
+        // return raw info
         return {
             "title": title,
             "projectNumber": projectNumber,
@@ -138,7 +143,7 @@ async function getProjectInfo(index) {
 }
 
 async function iati_status_norm(status_code) {
-    statuses = [
+    let statuses = [
         ['completed', '3'],
         ['closed', '4'],
         ['identification', '1'],
@@ -163,19 +168,24 @@ async function iati_status_norm(status_code) {
 }
 
 function giz_status_code(status) {
+    //ongoing
     if (status.replace("\n", "") == "laufendes Projekt") return '2'
+    //completed
     if (status.replace("\n", "") == "Projekt beendet") return '3'
     return null
 }
 
 async function giz_aid_project(project) {
+    //get raw data
     const raw_data = project
+    //name
     const name = project.title
+    // project org id and remove \n
     const proj_org_id = project.projectNumber.replace("\n", '')
         //status
     const status_code = giz_status_code(project.status)
     const status = await iati_status_norm(status_code)
-        //task manager
+        //task manager not used
     const contact = project["Contact person"].split('    ')
     const email = contact[1]
     const fullname = contact[0]
@@ -206,7 +216,6 @@ async function giz_aid_project(project) {
     const implementer = await getImplementer(implementer_str)
         //sub_funder
     const sub_funder_str = project["Cofinancing"][0] == "not available" ? [] : project["Cofinancing"]
-    var sub_funder_preprocess = []
 
     const sub_funder = await getSubFunder(sub_funder_str)
 
@@ -301,36 +310,47 @@ exports.getProjects = async(req, res, next) => {
 
 exports.newProjects = async(req, res, next) => {
     data = [];
-    for (let i = 0; i < 1000; i++) {
+    //loop through all 500 available projects
+    for (let i = 0; i < 500; i++) {
         console.log(i);
         try {
-
+            //get raw info using puppeteer
             const project = await getProjectInfo(i);
-
+            //get the project normalized info and the countries
             var tmp = await giz_aid_project(project)
+            //project norm info
             var project_data = tmp[0]
+            //coutries
             var countries = tmp[1]
+            //init project to save
             var project_to_save = null
+            //check if project exists
             let proj_exists = await containsProject(project_data.proj_org_id)
+            //if so break
             if (proj_exists) {
-                console.log("Done!!!!!!!!")
+                console.log("Exists!!!!! "+project_data.proj_org_id)
                 break
 
 
-            } else {
+            } 
+            //else add new
+            else {
                 console.log("NEW!!!!!!!!")
+                //if no country save without it
                 if (countries == null) {
                     project_to_save = new ProjectPreProd(project_data)
                     project_to_save.save()
                         //    console.log(project_data);
                     continue
                 }
+                //if country list is empty save without it
                 if (countries.length == 0) {
                     project_to_save = new ProjectPreProd(project_data)
                     project_to_save.save()
                         //   console.log(project_data);
                     continue
                 }
+                //save for all countries
                 for (let i = 0; i < countries.length; i++) {
                     project_data.country = countries[i]
                     project_to_save = new ProjectPreProd(project_data)
