@@ -7,6 +7,39 @@ var status = require("../models/status");
 const countrycode = require("../models/country");
 const organizationtype = require("../models/organizationtypes");
 const Organization = require("../models/organization");
+var Project = require("../models/projectpreprod");
+
+//add link to projects scrapped from org 
+exports.add_project_url = async (req, res, next) => {
+  let afdb_base = 'https://projectsportal.afdb.org/dataportal/VProject/show/'
+  //afdb
+  console.log("start afdb")
+  let projs = await Project.find({source:"org.afdb.portal.VProject", proj_org_id:{$nin:[null]}}).select({_id:1, proj_org_id:1,project_url:1});
+  console.log(projs.length)
+  for(let i=0;i<projs.length;i++){
+    if(projs[i].project_url==null){
+    let up =await Project.updateOne({_id:projs[i]._id},{$set:{project_url:afdb_base+projs[i].proj_org_id+'?format=html&lang=en'}})
+    console.log(up)}
+    console.log(i)
+
+  }
+
+  let wb_base = "https://projects.worldbank.org/en/projects-operations/project-detail/"
+
+  // projects.worldbank.org
+  console.log("start wb")
+  let projs2 = await Project.find({source:"projects.worldbank.org", proj_org_id:{$nin:[null]}}).select({_id:1, proj_org_id:1,project_url:1});
+  console.log(projs2.length)
+  for(let i=0;i<projs2.length;i++){
+    if(projs2[i].project_url==null){
+    let up =await Project.updateOne({_id:projs2[i]._id},{$set:{project_url:wb_base+projs2[i].proj_org_id}})
+    console.log(up)}
+    console.log(i)
+
+  }
+  res.status(200).json("done");
+};
+
 // get project by code
 exports.project_by_id = async (req, res, next) => {
   let item = await Project.findOne({ id: req.params.id.toUpperCase() });
