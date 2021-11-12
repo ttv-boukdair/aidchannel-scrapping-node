@@ -11,6 +11,7 @@ var Youtube = require("../models/youtube");
 var Organization = require("../models/organization");
 const googleNews = require('google-news-rss-to-js');
 const { put } = require("../routes/InitDBRoute");
+const tr = require('timeago-reverse');
 
 async function getVideos(url){
 
@@ -29,6 +30,7 @@ async function getVideos(url){
     const yt_base = "https://www.youtube.com/watch?v="
     console.log(query+' || '+idType+' || '+id)
     var resp = await ytch.getChannelVideos(id,'newest', idType)
+    console.log(resp)
     for(let i=0; i<resp.items.length; i++){
       if(i==10) break;
       let channel_url=query
@@ -37,6 +39,7 @@ async function getVideos(url){
       let title = resp.items[i].title
       let thumbnail = resp.items[i].videoThumbnails.pop().url
       let published = resp.items[i].publishedText
+      let date = tr.parse(resp.items[i].publishedText);
       let video_length = resp.items[i].durationText
       let view_count = resp.items[i].viewCount
       one_vid = {
@@ -46,6 +49,7 @@ async function getVideos(url){
         title:title,
         thumbnail:thumbnail,
         published:published,
+        date:date,
         video_length:video_length,
         view_count:view_count,
         
@@ -83,17 +87,17 @@ exports.addYTVideos = async (req, res, next) => {
         title: videos[i].title,
         thumbnail: videos[i].thumbnail,
         published: videos[i].published,
+        date:tr.parse(videos[i].published),
         video_length:videos[i].video_length,
         view_count: videos[i].view_count,
   
     organization: org_id,
     country:country,
   })
-yt.save()
+// yt.save()
 console.log(yt)
 }
-console.log(del_vidz)
-   res.status(200).json(videos);}
+res.status(200).json(videos);}
 
 
 async function localAddYT(id) {
@@ -114,6 +118,7 @@ async function localAddYT(id) {
           title: videos[i].title,
           thumbnail: videos[i].thumbnail,
           published: videos[i].published,
+          date:tr.parse(videos[i].published),
           video_length:videos[i].video_length,
           view_count: videos[i].view_count,
     
@@ -137,17 +142,25 @@ async function vid_exists(vid){
 
 
 exports.putYTVideos = async (req, res, next) => {
-  const orgs = await Organization.find({youtube_url:{$nin:[null]}})
+  const orgs = await Organization.find({head_office_id:{$nin:[null]},youtube_url:{$nin:[null]},country:"60c734131fabf71db0448ed8"})
   var id
   var yt_url
   var result
+  console.log(orgs.length)
   for(let i=0;i<orgs.length; i++){
+    try{
+
+    
     id = orgs[i]._id
     yt_url =orgs[i].youtube_url
     result = await localAddYT(id)
     console.log(result)
   }
-  //  res.status(200).json(result);
+    catch(e){
+      console.log(e)
+    
+  }}
+   res.status(200).json(result);
 
 }
 

@@ -18,6 +18,10 @@ const countrySchema = mongoose.Schema({
   published: {
     type: String,
   },
+  date: {
+    type: Date,
+    default: null,
+  },
   video_length: {
     type: String,
   },
