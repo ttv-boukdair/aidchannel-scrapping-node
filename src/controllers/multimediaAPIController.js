@@ -142,7 +142,7 @@ async function vid_exists(vid){
 
 
 exports.putYTVideos = async (req, res, next) => {
-  const orgs = await Organization.find({head_office_id:{$nin:[null]},youtube_url:{$nin:[null]},country:"60c734131fabf71db0448ed8"})
+  const orgs = await Organization.find({youtube_url:{$nin:[null]},country:"60c734131fabf71db0448ed8"})
   var id
   var yt_url
   var result
