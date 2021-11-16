@@ -17,6 +17,10 @@ router.get(
   "/videosAcceptedByCountryLimit/:codeCountry",
   youtubeCtrl.getAcceptedVideosByCountryLimit
 );
+router.get(
+  "/videosDistinctByCountryLimit/:codeCountry",
+  youtubeCtrl.getDistinctVideosByCountryLimit
+);
 router.post("/videosOfCountry", youtubeCtrl.getVideosScrolling);
 // accept video web master
 router.put("/acceptVideo/:videoId", youtubeCtrl.acceptVideo);

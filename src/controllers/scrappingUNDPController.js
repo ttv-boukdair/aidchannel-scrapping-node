@@ -227,7 +227,7 @@ exports.getUNDPProjects = async (req, res) => {
 
 exports.newUNDPProjects = async (req, res) => {
   //years to scrap since it is not possible to scrap without year argument
-  const year = ["2017", "2018", "2019", "2020", "2021", "2022"];
+  const year = ["2021", "2022"];
   //limit of projects per page
   const limit = 100;
   //stopping condition

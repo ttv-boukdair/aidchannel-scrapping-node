@@ -25,6 +25,33 @@ exports.getAllVideosByCountryPagination = async (req, res, next) => {
     res.status(500).json({ error: err });
   }
 };
+
+exports.getDistinctVideosByCountryLimit = async (req, res, next) => {
+  const { limit = 5 } = req.query;
+  const { codeCountry } = req.params;
+  try {
+    let findCountry = await country.findOne({
+      code: codeCountry.toUpperCase(),
+    });
+    
+    let videosByCountry = await Youtube.aggregate([
+      { $match: { country:findCountry._id } },
+      {
+        $sort: { date: -1 },
+      },
+      {
+        $group: {
+          _id: "$organization",
+          "doc": { "$first": "$$ROOT" }
+        }
+      },
+      { "$replaceRoot": { "newRoot": "$doc" } }, { $sort: { date: -1 } }, { $limit: limit }])
+      res.status(200).json(videosByCountry);
+  }
+  catch (e) {
+    res.status(500).json({ error: e });
+  }
+}
 exports.getAcceptedVideosByCountryLimit = async (req, res, next) => {
   const { limit = 9 } = req.query;
   const { codeCountry } = req.params;
@@ -123,7 +150,7 @@ exports.test = async (req, res, next) => {
       Youtube.findByIdAndUpdate(
         item?._id,
         { validation: 0 },
-        function (err) {}
+        function (err) { }
       );
     });
     res.status(200).json({
@@ -161,9 +188,9 @@ exports.SearchByChannelName = async (req, res, next) => {
 exports.getVideosScrolling = async (req, res, next) => {
   //url collecte n projets
   const { limit = 9, page = 1 } = req.query;
-    const { code } = req.body;
+  const { code } = req.body;
 
-    let countrycode = await country.find({ code: code.toUpperCase() });
+  let countrycode = await country.find({ code: code.toUpperCase() });
   const youtube = await Youtube.find({
     country: countrycode[0]._id,
     channel_name: { $regex: new RegExp(req.body.searchText, "i") },
