@@ -93,6 +93,8 @@ const CtrlGIZ = require("./controllers/scrappingGIZController");
 const CtrlAFDB = require("./controllers/scrappingAFDBController");
 const CtrlWB = require("./controllers/scrappingWBController");
 const CtrlUNDP = require("./controllers/scrappingUNDPController");
+const CtrlUSAID = require("./controllers/scrappingUSAIDIATIController");
+const CtrlUSAIDgov = require("./controllers/scrappingUSAIDgovController");
 app.use("/uploads", express.static("uploads"));
 
 //Scrapping Interruptions
@@ -105,6 +107,7 @@ app.use("/uploads", express.static("uploads"));
 
   // CtrlIATI.scrappingIATI();
 
+  // CtrlUSAIDgov.newUSAID()
 
 // if (await CtrlIATI.interrupted()) {
 // CtrlIATI.scrappingIATI();}
