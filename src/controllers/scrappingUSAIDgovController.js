@@ -108,24 +108,23 @@ exports.scrappingUSAID = async (req, res, next) => {
 exports.newUSAID =  async (req, res, next) => {
   const link = "https://foreignassistance.gov/data#tab-query"
   // await getInfoProject(link)
-  const download = "https://foreignassistance.gov/data_query/results.csv?country_id=504&transaction_type=Obligations"
+  const download = "https://foreignassistance.gov/data_query/results.csv?country_id=504"
   const file = 'src/data/usaidData.csv'
-  // let downFile = getRemoteFile(file,download)
-  let arr = setTimeout(()=>{let arr = csvToArray(file); return arr},2000)
-  console.log(arr)
-  setTimeout(()=>{console.log(arr[0])},3000)
+  getRemoteFile(file,download)
+  setTimeout(()=>{csvToArray(file)},30000)
+  
 
 }
 
 
 function csvToArray(file){
-  let arr = []
-  fss.createSyncReadStream(file)
+  let arr= []
+  fs.createReadStream(file)
   .pipe(csv())
   .on('data', (data) => arr.push(data))
   .on('end', () => {
+    console.log(arr[0])
     console.log(arr.length)
     
   });
-  return arr
 }
