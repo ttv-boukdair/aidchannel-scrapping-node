@@ -16,6 +16,7 @@
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
+    "country-iso-3-to-2": "^1.1.0",
     "csv-parser": "^3.0.0",
     "csv-to-and-from-array": "^0.1.0",
     "dotenv-flow": "^3.2.0",

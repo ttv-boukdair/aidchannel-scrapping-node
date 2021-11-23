@@ -107,7 +107,7 @@ app.use("/uploads", express.static("uploads"));
 
   // CtrlIATI.scrappingIATI();
 
-  // CtrlUSAIDgov.newUSAID()
+  
 
 // if (await CtrlIATI.interrupted()) {
 // CtrlIATI.scrappingIATI();}
@@ -122,22 +122,39 @@ app.use("/uploads", express.static("uploads"));
 // CtrlUNDP.newUNDPProjects();
 
 // CtrlWB.getWBProjects();
-
+// CtrlUSAIDgov.newUSAID()
 
 // CtrlGIZ.getProjects();
 // CtrlGIZ.newProjects()
 
-// cron.schedule("00 00 * * *", function () {
-//   console.log("update");
-//   CtrlMulti.putTweets();
-// });
+cron.schedule("00 01 * * *", function () {
+  console.log("update tweets");
+  CtrlMulti.putTweets();
+});
 
-// cron.schedule("00 00 * * *", function () {
-//   console.log("update");
-//   CtrlMulti.putYTVideos();
-// });
+cron.schedule("00 00 * * *", function () {
+  console.log("update youtubes");
+  CtrlMulti.putYTVideos();
+});
 
 
+cron.schedule("00 02 * * *", function () {
+  console.log("update wb");
+  CtrlWB.newWBProjects();
+  
+});
+
+cron.schedule("00 03 * * *", function () {
+  console.log("update afdb");
+  CtrlAFDB.newAFDBProjects();
+  
+});
+
+cron.schedule("00 04 * * *", function () {
+  console.log("update giz");
+  CtrlGIZ.newProjects();
+  
+});
 // CtrlNews.addOrgArticles()
 
 

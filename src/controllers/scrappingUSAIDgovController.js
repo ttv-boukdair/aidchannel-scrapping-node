@@ -23,6 +23,9 @@ const fs = require('fs');
 const fss = require('fs-stream-sync')
 const http = require('http');
 const csv = require('csv-parser')
+const getCountryISO2 = require("country-iso-3-to-2");
+const { raw } = require("body-parser");
+
 
 /**
  * Downloads file from remote HTTP[S] host and puts its contents to the
@@ -122,9 +125,189 @@ function csvToArray(file){
   fs.createReadStream(file)
   .pipe(csv())
   .on('data', (data) => arr.push(data))
-  .on('end', () => {
+  .on('end', async () => {
     console.log(arr[0])
     console.log(arr.length)
-    
+    let proj = await projectNormalize(arr[0])
+    console.log(proj)
   });
+}
+
+async function projectNormalize(p){
+  let proj = {}
+  //source
+  let source = 'https://foreignassistance.gov'
+  //country
+  let countryCode = getCountryISO2(p['Country Code'])
+  let countryObj = await Countries.findOne({code:countryCode.toUpperCase()})
+  let country = countryObj._id
+  //donor
+  let funder = await getFunder(p['Funding Agency Name'])
+  //implementer
+  let implementer = await getImplementer(p['Implementing Partner Name'])
+  //id
+  let source_id = p['Activity ID']
+  //name
+  let name = p['Activity Name']
+  //description
+  let description = p['Activity Description']
+  //start date
+  let actual_start = p['Activity Start Date']
+  //end date
+  let actual_end = p['Activity End Date']
+  //cost
+  let total_cost = p['Current Dollar Amount']
+  //thematique
+  let thematique = await iati_sector_norm(p['International Purpose Code'])
+
+  let raw_data_org = p
+  return new ProjectPreProd({
+    source:source,
+    source_id:source_id,
+    name:name,
+    description:description,
+    funder:funder,
+    implementer:implementer,
+    country:country,
+    actual_start:actual_start,
+    actual_end:actual_end,
+    total_cost:total_cost,
+    thematique:thematique,
+    raw_data_org:raw_data_org,
+  })
+}
+
+
+
+async function getFunder(org) {
+  const funder_object_id = "60c23ffc2b006960f055e8ef";
+  let funder = null;
+  if (org) {
+    //console.log(iati_org)
+      
+          let data = JSON.stringify({"text":org})
+          let finded_organizations = await axios({
+            method: 'post',
+            httpsAgent: agent,
+            url: 'https://ai.jtsolution.org/sim-orgs',
+            headers: { 
+              'Content-Type': 'application/json'
+            },
+            data : data
+          }); 
+          finded_organizations = finded_organizations.data
+          if (finded_organizations.length > 0)
+          funder = finded_organizations[0][0]
+        // else funder = "not exist";
+      
+    
+  }
+  return funder;
+}
+async function getSubFunder(iati_org, funder) {
+  const funder_object_id = "60c23ffc2b006960f055e8ef";
+  let sub_funder = [];
+  if (iati_org) {
+    if (iati_org.length > 0) {
+      for (let i = 0; i < iati_org.length; i++) {
+        if(iati_org[i][0] == 'Funding' || iati_org[i][0] == 'Extending'){
+          let data = JSON.stringify({"text":iati_org[i][1]})
+          let finded_organizations = await axios({
+            method: 'post',
+            httpsAgent: agent,
+            url: 'https://ai.jtsolution.org/sim-orgs',
+            headers: { 
+              'Content-Type': 'application/json'
+            },
+            data : data
+          }); 
+          finded_organizations = finded_organizations.data
+          iati_org.splice(i, 1)
+        if (finded_organizations.length > 0)
+          sub_funder.push(finded_organizations[0][0])
+        
+          
+        // else funder = "not exist";
+      }
+    }
+    }
+  }
+  return sub_funder;
+}
+async function getImplementer(org) {
+  const funder_object_id = "60c23ffc2b006960f055e8f2";
+  let funder = null;
+  if (org) {
+    //console.log(iati_org)
+      
+          let data = JSON.stringify({"text":org})
+          let finded_organizations = await axios({
+            method: 'post',
+            httpsAgent: agent,
+            url: 'https://ai.jtsolution.org/sim-orgs',
+            headers: { 
+              'Content-Type': 'application/json'
+            },
+            data : data
+          }); 
+          finded_organizations = finded_organizations.data
+          if (finded_organizations.length > 0)
+          funder = finded_organizations[0][0]
+        // else funder = "not exist";
+      
+    
+  }
+  return funder;
+}
+async function getSubImplementer(iati_org, implemeter) {
+  const implemeter_object_id = "60c23ffc2b006960f055e8f2";
+  let sub_funder = [];
+  if (iati_org) {
+    if (iati_org.length > 0) {
+      for (let i = 0; i < iati_org.length; i++) {
+        if(iati_org[i][0] == 'Implementing' || iati_org[i][0] == 'Accountable'){
+          let data = JSON.stringify({"text":iati_org[i][1]})
+          let finded_organizations = await axios({
+            method: 'post',
+            httpsAgent: agent,
+            url: 'https://ai.jtsolution.org/sim-orgs',
+            headers: { 
+              'Content-Type': 'application/json'
+            },
+            data : data
+          }); 
+          finded_organizations = finded_organizations.data
+          iati_org.splice(i, 1)
+        if (finded_organizations.length > 0)
+          sub_funder.push(finded_organizations[0][0])
+        
+          
+        // else implemeter = "not exist";
+      }
+    }
+    }
+  }
+  return sub_funder;
+}
+
+async function iati_sector_norm(sector_code) {
+  let sector_id = null;
+  if(sector_code == null){
+    return null
+  }
+  
+  for (let i=0; i< SectorsDATA.length; i++) {
+    if(sector_code == SectorsDATA[i].IATI){
+      sector_id = await Thematiques.find({name:SectorsDATA[i].AID})
+      if(sector_id!=null){
+    
+      if(sector_id.length>0){sector_id = sector_id[0]._id}
+      else{
+        sector_id=null
+      }}
+      
+      break
+    }
+  }
+  return sector_id;
 }

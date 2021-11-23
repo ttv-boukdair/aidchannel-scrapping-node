@@ -235,7 +235,8 @@ async function giz_aid_project(project) {
         total_cost: total_cost,
         actual_start: new Date(actual_start),
         actual_end: new Date(actual_end),
-        raw_data_org: raw_data
+        raw_data_org: raw_data,
+        project_url:"https://www.giz.de/projektdaten/projects.action?request_locale=en_GB&pn="+proj_org_id.replace(/\./g,'')
     }, counts]
 
 }
