@@ -150,16 +150,17 @@ cron.schedule("30 02 * * *", function () {
   
 });
 
-cron.schedule("00 03 * * *", function () {
-  console.log("update giz");
-  CtrlGIZ.newProjects();
+// cron.schedule("00 03 * * *", function () {
+//   console.log("update giz");
+//   CtrlGIZ.newProjects();
   
-});
+// });
 
-cron.schedule("00 05 * * *", function () {
-  console.log("update undp");
-  CtrlUNDP.newUNDPProjects();
-  
-});
+// cron.schedule("00 05 * * *", function () {
+//   console.log("update undp");
+//   CtrlUNDP.newUNDPProjects();
+// });
+
+
 // CtrlNews.addOrgArticles()
 module.exports = app;
