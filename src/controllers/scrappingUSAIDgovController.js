@@ -126,10 +126,17 @@ function csvToArray(file){
   .pipe(csv())
   .on('data', (data) => arr.push(data))
   .on('end', async () => {
-    console.log(arr[0])
-    console.log(arr.length)
-    let proj = await projectNormalize(arr[0])
-    console.log(proj)
+    for(let i=0;i<arr.length;i++){
+      if(arr[i]['Fiscal Year'] == '2018'){
+        console.log('done')
+        break
+      }
+      
+      let proj = await projectNormalize(arr[i])
+      await proj.save()
+      console.log(proj)
+    }
+    
   });
 }
 

@@ -160,7 +160,7 @@ cron.schedule("30 02 * * *", function () {
 //   console.log("update undp");
 //   CtrlUNDP.newUNDPProjects();
 // });
-
+// CtrlUSAIDgov.newUSAID()
 
 // CtrlNews.addOrgArticles()
 module.exports = app;
