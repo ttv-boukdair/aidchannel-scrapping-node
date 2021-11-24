@@ -121,7 +121,7 @@ async function localAddYT(id) {
           date:tr.parse(videos[i].published),
           video_length:videos[i].video_length,
           view_count: videos[i].view_count,
-    
+          validation:0,
       organization: org_id,
       country:country,
     })
