@@ -1,14 +1,31 @@
 const axios = require("axios");
+const https = require('https');
+const jsdom = require("jsdom");
+var Organization = require("../models/organization");
+var Regions = require("../models/regions");
+const Params = require("../models/params");
+var Status = require("../models/status");
+var Countries = require("../models/country");
+var Thematiques = require("../models/thematiques");
+const { JSDOM } = jsdom;
+var Project = require("../models/projectpreprod");
+var SectorsDATA = require("../data/sectors.json");
+const User = require("../models/user2");
+const LanguageDetect = require('languagedetect');
+const { off } = require("process");
+const lngDetector = new LanguageDetect();
+const agent = new https.Agent({
+  rejectUnauthorized: false
+});
 
-
-exports.getAFDProjects = async(req, res) => {
-    const url = "https://opendata.afd.fr/api/records/1.0/search/?dataset=donnees-aide-au-developpement-afd&q=&lang=en&rows=2000";
+exports.newAFDProjects = async(req, res) => {
+    const url = "https://opendata.afd.fr/api/records/1.0/search/?dataset=donnees-aide-au-developpement-afd&q=&sort=date_d_octroi&refine.pays_de_realisation=MAROC&refine.etat_du_projet=Exécution&lang=en&rows=2000";
     const projects = await axios.get(url);
     const dataset = projects.data.records;
     var count = dataset.length;
     const raw_data = [];
     for (let i = 0; i < dataset.length; i++) {
-        // if (i == 5) break;
+        
         const { datasetid, recordid, geometry, record_timestamp } = dataset[i];
         const {
             id_concours,
@@ -48,7 +65,11 @@ exports.getAFDProjects = async(req, res) => {
             id_projet,
             region
         } = dataset[i].fields;
-
+        let proj_exists = await containsProject("https://opendata.afd.fr", id_projet)
+        if (proj_exists) {
+            console.log("Done!!!!!!!!!");
+            break
+        };
         const data_model = {
             "datasetid": datasetid,
             "recordid": recordid,
@@ -91,17 +112,103 @@ exports.getAFDProjects = async(req, res) => {
             "id_projet": id_projet,
             "region": region
         };
-        raw_data.push(data_model);
+
+        let proj = await normProject(data_model)
+        console.log(proj);
 
     }
 
     console.log(count);
 
 
-    try {
-        return res.status(200).json(raw_data);
-    } catch (error) {
-        console.error(error);
-        return res.status(400).json({ error });
+
+}
+
+function getIsoCode(c){
+    let dict = {'MAROC':'MA'}
+    return dict[c]
+}
+async function normProject(p){
+    //get country
+    const country_code = getIsoCode(p.pays_de_realisation)
+    let country = await Countries.findOne({code:country_code})
+    //get funder
+    let funder = await getFunder("Agence Française de Développement (AFD)")
+    //sector
+    let thematique = await getSector(p.libelle_secteur_economique_cad_5)
+    const proj = new Project({
+        source:"https://opendata.afd.fr",
+        proj_org_id:p.id_projet,
+        name:p.nom_du_projet_pour_les_instances,
+        description:p.description_du_projet,
+        country:country._id,
+        funder:funder,
+        implementer:funder,
+        approval_date:p.date_d_octroi,
+        total_cost:"Euro "+p.engagements_bruts_euro,
+        budget:"Euro "+p.budget,
+    thematique:thematique,
+    project_url:p.lien_fiche_projet,
+    raw_data_org:p,
+    maj_date:p.date_mise_a_jour_donnees_projet,
+    })
+
+    return proj
+}
+
+async function getFunder(org) {
+    const funder_object_id = "60c23ffc2b006960f055e8ef";
+    let funder = null;
+    if (org) {
+      //console.log(iati_org)
+        
+            let data = JSON.stringify({"text":org})
+            let finded_organizations = await axios({
+              method: 'post',
+              httpsAgent: agent,
+              url: 'https://ai.jtsolution.org/sim-orgs',
+              headers: { 
+                'Content-Type': 'application/json'
+              },
+              data : data
+            }); 
+            finded_organizations = finded_organizations.data
+            if (finded_organizations.length > 0)
+            funder = finded_organizations[0][0]
+          // else funder = "not exist";
+        
+      
     }
+    return funder;
+  }
+
+  async function getSector(org) {
+    let funder = null;
+
+    if (org) {
+
+        let data = JSON.stringify({ "text": org })
+        let finded_organizations = await axios({
+            method: 'post',
+            httpsAgent: agent,
+            url: 'https://ai.jtsolution.org/sim-sect',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: data
+        });
+        finded_organizations = finded_organizations.data
+        if (finded_organizations[0][1] > 0.3)
+            funder = await Thematiques.find({ name: finded_organizations[0][0] });
+        if (funder) funder = funder[0]._id
+
+
+
+    }
+    return funder;
+}
+
+async function containsProject(source, proj_org_id) {
+    let proj = await Project.find({ source:source, proj_org_id: proj_org_id })
+    return proj.length ? true : false
 }

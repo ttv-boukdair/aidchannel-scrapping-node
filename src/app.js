@@ -91,11 +91,13 @@ const CtrlIATI = require("./controllers/scrappingIATIController");
 const CtrlNews = require("./controllers/scrappingNewsController");
 const CtrlGIZ = require("./controllers/scrappingGIZController");
 const CtrlAFDB = require("./controllers/scrappingAFDBController");
+const CtrlAFD = require("./controllers/scrappingAFDController");
 const CtrlWB = require("./controllers/scrappingWBController");
 const CtrlUNDP = require("./controllers/scrappingUNDPController");
 const CtrlUSAID = require("./controllers/scrappingUSAIDIATIController");
 const CtrlUSAIDgov = require("./controllers/scrappingUSAIDgovController");
 app.use("/uploads", express.static("uploads"));
+
 
 //Scrapping Interruptions
 
@@ -127,6 +129,24 @@ app.use("/uploads", express.static("uploads"));
 // CtrlGIZ.getProjects();
 // CtrlGIZ.newProjects()
 
+
+
+// cron.schedule("00 03 * * *", function () {
+//   console.log("update giz");
+//   CtrlGIZ.newProjects();
+  
+// });
+
+// cron.schedule("00 05 * * *", function () {
+//   console.log("update undp");
+//   CtrlUNDP.newUNDPProjects();
+// });
+
+
+/******************************** PROD SCRAPPINGS ********************************/
+
+// CtrlAFD.newAFDProjects();
+
 cron.schedule("00 01 * * *", function () {
   console.log("update tweets");
   CtrlMulti.putTweets();
@@ -149,18 +169,4 @@ cron.schedule("30 02 * * *", function () {
   CtrlAFDB.newAFDBProjects();
   
 });
-
-// cron.schedule("00 03 * * *", function () {
-//   console.log("update giz");
-//   CtrlGIZ.newProjects();
-  
-// });
-
-// cron.schedule("00 05 * * *", function () {
-//   console.log("update undp");
-//   CtrlUNDP.newUNDPProjects();
-// });
-// CtrlUSAIDgov.newUSAID()
-
-// CtrlNews.addOrgArticles()
 module.exports = app;
