@@ -92,6 +92,7 @@ const CtrlNews = require("./controllers/scrappingNewsController");
 const CtrlGIZ = require("./controllers/scrappingGIZController");
 const CtrlAFDB = require("./controllers/scrappingAFDBController");
 const CtrlAFD = require("./controllers/scrappingAFDController");
+const CtrlADB = require("./controllers/scrappingADBController");
 const CtrlWB = require("./controllers/scrappingWBController");
 const CtrlUNDP = require("./controllers/scrappingUNDPController");
 const CtrlUSAID = require("./controllers/scrappingUSAIDIATIController");
@@ -141,13 +142,13 @@ app.use("/uploads", express.static("uploads"));
 //   console.log("update undp");
 //   CtrlUNDP.newUNDPProjects();
 // });
-
+CtrlADB.newADBProjects();
 
 /******************************** PROD SCRAPPINGS ********************************/
 
 
 
-
+// 
 
 cron.schedule("00 01 * * *", function () {
   console.log("update tweets");

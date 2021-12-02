@@ -30,12 +30,15 @@ async function getProjectInfo(link) {
     await page.goto(link, { waitUntil: 'networkidle2' });
 
     const info = await page.evaluate(() => {
+        
 
         const first_part = document.querySelector("table.pds").querySelectorAll("td");
         // const second_part = document.querySelectorAll("table.pds")[1];
         const source = "www.adb.org";
         const name = first_part[1].innerText;
+        console.log(name)
         const number = first_part[3].innerText;
+        console.log(number)
         const country = first_part[5].innerText;
         const status = first_part[7].innerText;
         const type = document.querySelector("#project-pds > div > div > div > table:nth-child(1) > tbody > tr:nth-child(5) > td:nth-child(2)").innerText;
@@ -181,4 +184,20 @@ exports.getADBProjects = async(req, res, next) => {
     }
 
     res.status(200).json(projects);
+}
+
+exports.newADBProjects = async(req, res, next) => {
+
+    const base_url = "https://www.adb.org/projects?page=0";
+    const links = await getProjectsLinks(base_url);
+    console.log(links);
+
+    const projects = [];
+    for (var i = 0; i < links.length; i++) {
+        console.log(i);
+        // if (i == 2) break;
+        var project = await getProjectInfo(links[i]);
+        console.log(project);
+    }
+
 }
