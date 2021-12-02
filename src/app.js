@@ -159,7 +159,6 @@ cron.schedule("00 00 * * *", function () {
   CtrlMulti.putYTVideos();
 });
 
-
 cron.schedule("00 02 * * *", function () {
   console.log("update wb");
   CtrlWB.newWBProjects();

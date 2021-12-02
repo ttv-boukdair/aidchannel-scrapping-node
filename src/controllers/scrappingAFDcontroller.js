@@ -114,6 +114,7 @@ exports.newAFDProjects = async(req, res) => {
         };
 
         let proj = await normProject(data_model)
+        proj.save()
         console.log(proj);
 
     }
