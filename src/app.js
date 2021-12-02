@@ -145,7 +145,9 @@ app.use("/uploads", express.static("uploads"));
 
 /******************************** PROD SCRAPPINGS ********************************/
 
-// CtrlAFD.newAFDProjects();
+
+
+
 
 cron.schedule("00 01 * * *", function () {
   console.log("update tweets");
@@ -169,4 +171,10 @@ cron.schedule("30 02 * * *", function () {
   CtrlAFDB.newAFDBProjects();
   
 });
+
+cron.schedule("00 23 * * *", function () {
+  console.log("update AFD");
+  CtrlAFD.newAFDProjects();
+});
+
 module.exports = app;
