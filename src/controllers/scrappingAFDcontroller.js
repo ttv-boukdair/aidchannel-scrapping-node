@@ -145,6 +145,7 @@ async function normProject(p){
         country:country._id,
         funder:funder,
         implementer:funder,
+        status:"60c7672e97cf97698bbe1755",
         approval_date:p.date_d_octroi,
         total_cost:"Euro "+p.engagements_bruts_euro,
         budget:"Euro "+p.budget,
