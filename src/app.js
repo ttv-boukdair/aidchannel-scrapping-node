@@ -92,6 +92,7 @@ const CtrlNews = require("./controllers/scrappingNewsController");
 const CtrlGIZ = require("./controllers/scrappingGIZController");
 const CtrlAFDB = require("./controllers/scrappingAFDBController");
 const CtrlAFD = require("./controllers/scrappingAFDController");
+const CtrlEnabel = require("./controllers/scrappingEnabelController");
 const CtrlADB = require("./controllers/scrappingADBController");
 const CtrlWB = require("./controllers/scrappingWBController");
 const CtrlUNDP = require("./controllers/scrappingUNDPController");
@@ -143,6 +144,14 @@ app.use("/uploads", express.static("uploads"));
 //   CtrlUNDP.newUNDPProjects();
 // });
 // CtrlADB.newADBProjects();
+
+
+
+/******************************** PREPROD SCRAPPINGS ********************************/
+
+//CtrlEnabel.newEnabelProjects();
+
+
 
 /******************************** PROD SCRAPPINGS ********************************/
 
