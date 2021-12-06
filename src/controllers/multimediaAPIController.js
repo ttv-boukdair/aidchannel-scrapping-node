@@ -160,7 +160,7 @@ exports.putYTVideos = async (req, res, next) => {
       console.log(e)
     
   }}
-   res.status(200).json(result);
+  console.log(result);
 
 }
 
