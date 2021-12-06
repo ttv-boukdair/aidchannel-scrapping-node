@@ -142,7 +142,7 @@ app.use("/uploads", express.static("uploads"));
 //   console.log("update undp");
 //   CtrlUNDP.newUNDPProjects();
 // });
-CtrlADB.newADBProjects();
+// CtrlADB.newADBProjects();
 
 /******************************** PROD SCRAPPINGS ********************************/
 
@@ -154,6 +154,7 @@ cron.schedule("00 01 * * *", function () {
   console.log("update tweets");
   CtrlMulti.putTweets();
 });
+
 
 cron.schedule("00 00 * * *", function () {
   console.log("update youtubes");
