@@ -17,7 +17,7 @@ var ProjectPreProd = require("../models/projectpreprod");
 const { FuzzySearch } = require('mongoose-fuzzy-search-next');
 const { get } = require("mongoose");
 
-
+//countries enabel numbers
 const enabel_countries = [
     { num: '12', name: 'Algeria', code: 'DZ' },
     { num: '24', name: 'Angola', code: 'AO' },
@@ -88,9 +88,11 @@ async function getProjectLinks(index) {
     page.setDefaultNavigationTimeout(0);
     // go to link
     await page.goto(url, { waitUntil: 'networkidle2' });
-    // 
+    // get page
     let data = await page.evaluate(() => {
+        //get all project a tags
         let raw_links = document.querySelectorAll("div > div.caption > h4 > a");
+        //get all links
         let links = Array.from(raw_links, a => "https://open.enabel.be" + a.getAttribute('href'))
         return links
     });
