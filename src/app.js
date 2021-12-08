@@ -176,6 +176,11 @@ cron.schedule("00 02 * * *", function () {
   
 });
 
+cron.schedule("30 01 * * *", function () {
+  console.log("update Enabel");
+CtrlEnabel.newEnabelProjects();
+});
+
 cron.schedule("30 02 * * *", function () {
   console.log("update afdb");
   CtrlAFDB.newAFDBProjects();
