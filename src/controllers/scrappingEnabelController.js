@@ -12,7 +12,6 @@ var Regions = require("../models/regions");
 var User = require("../models/user2");
 const puppeteer = require("puppeteer");
 var Thematiques = require("../models/thematiques");
-var ProjectAI = require("../models/projectai");
 var ProjectPreProd = require("../models/projectpreprod");
 const { FuzzySearch } = require('mongoose-fuzzy-search-next');
 const { get } = require("mongoose");
@@ -155,7 +154,7 @@ async function normProject(project, link) {
     let total_cost = project.budget
     let country = project.country
     let project_url = link
-    return new ProjectAI({
+    return new ProjectPreProd({
         source: source,
         project_url: project_url,
         proj_org_id: proj_org_id,
@@ -291,6 +290,6 @@ async function getSector(org) {
 }
 
 async function containsProject(proj_org_id, source) {
-    let proj = await ProjectAI.find({ proj_org_id: proj_org_id, source: source })
+    let proj = await ProjectPreProd.find({ proj_org_id: proj_org_id, source: source })
     return proj.length ? true : false
 }
