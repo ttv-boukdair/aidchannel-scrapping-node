@@ -140,7 +140,7 @@ async function normProject(project, link) {
     let name = project.name
     let source = 'open.enabel.be/en/projects'
     let proj_org_id = project.proj_code
-    let funder = await getFunder(project.donor == 'Belgium' ? ' Belgian Development Agency (ENABEL)' : project.donor)
+    let funder = await getFunder(project.donor == 'Belgium' ? 'Belgian Development Agency (ENABEL)' : project.donor)
     let image_url = project.image_url
     let description = project.description
     let objectives = project.general_objective + '\n\n' + project.specific_objective
