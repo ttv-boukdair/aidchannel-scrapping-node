@@ -227,7 +227,7 @@ exports.getUNDPProjects = async (req, res) => {
 
 exports.newUNDPProjects = async (req, res) => {
   //years to scrap since it is not possible to scrap without year argument
-  const year = ["2021"];
+  const year = ["2021", "2022"];
   //limit of projects per page
   const limit = 100;
   //stopping condition
@@ -266,11 +266,8 @@ exports.newUNDPProjects = async (req, res) => {
             console.log(year[y], i)
             //get projet basic info
             const { project_id, title, description, country, sector, sdg, signature_solution, donor, marker } = data[i];
-            if(country!='Morocco') {
-              console.log("Not MA");
-              continue}
             //check if exists
-            let proj_exist = await containsProject("open.undp.org/projects", project_id)
+            let proj_exist = await containsProject(project_id)
             if (proj_exist) {
               // to_stop=true
               console.log("skipped!!!!", project_id)
@@ -507,8 +504,8 @@ exports.interrupted = async (req, res, next) => {
 
 }
 
-async function containsProject(source, proj_org_id) {
-  let proj = await ProjectPreProd.find({ source: source, proj_org_id: proj_org_id })
+async function containsProject(proj_org_id) {
+  let proj = await ProjectPreProd.find({ proj_org_id: proj_org_id })
   return proj.length ? true : null
 }
 

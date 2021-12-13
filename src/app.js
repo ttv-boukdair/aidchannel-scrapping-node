@@ -149,7 +149,7 @@ app.use("/uploads", express.static("uploads"));
 
 /******************************** PREPROD SCRAPPINGS ********************************/
 
-//CtrlEnabel.newEnabelProjects();
+
 
 
 
@@ -157,13 +157,11 @@ app.use("/uploads", express.static("uploads"));
 
 
 
-// 
 
 cron.schedule("00 01 * * *", function () {
   console.log("update tweets");
   CtrlMulti.putTweets();
 });
-
 
 cron.schedule("00 00 * * *", function () {
   console.log("update youtubes");
@@ -191,5 +189,11 @@ cron.schedule("00 23 * * *", function () {
   console.log("update AFD");
   CtrlAFD.newAFDProjects();
 });
+
+cron.schedule("00 22 * * *", function () {
+  console.log("update UNDP");
+  CtrlUNDP.newUNDPProjects();
+});
+
 
 module.exports = app;
