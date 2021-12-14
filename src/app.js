@@ -96,6 +96,7 @@ const CtrlEnabel = require("./controllers/scrappingEnabelController");
 const CtrlADB = require("./controllers/scrappingADBController");
 const CtrlWB = require("./controllers/scrappingWBController");
 const CtrlUNDP = require("./controllers/scrappingUNDPController");
+const CtrlIFAD = require("./controllers/scrappingIFADController");
 const CtrlUSAID = require("./controllers/scrappingUSAIDIATIController");
 const CtrlUSAIDgov = require("./controllers/scrappingUSAIDgovController");
 app.use("/uploads", express.static("uploads"));
@@ -150,7 +151,7 @@ app.use("/uploads", express.static("uploads"));
 /******************************** PREPROD SCRAPPINGS ********************************/
 
 
-
+// CtrlIFAD.newIFADProjects();
 
 
 /******************************** PROD SCRAPPINGS ********************************/
