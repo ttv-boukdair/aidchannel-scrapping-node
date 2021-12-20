@@ -151,7 +151,7 @@ app.use("/uploads", express.static("uploads"));
 /******************************** PREPROD SCRAPPINGS ********************************/
 
 
-// CtrlIFAD.newIFADProjects();
+CtrlIFAD.newIFADProjects();
 
 
 /******************************** PROD SCRAPPINGS ********************************/
