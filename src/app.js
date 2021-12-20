@@ -151,7 +151,7 @@ app.use("/uploads", express.static("uploads"));
 /******************************** PREPROD SCRAPPINGS ********************************/
 
 
-CtrlIFAD.newIFADProjects();
+
 
 
 /******************************** PROD SCRAPPINGS ********************************/
@@ -194,6 +194,11 @@ cron.schedule("00 23 * * *", function () {
 cron.schedule("00 22 * * *", function () {
   console.log("update UNDP");
   CtrlUNDP.newUNDPProjects();
+});
+
+cron.schedule("03 22 * * *", function () {
+  console.log("update IFAD");
+  CtrlIFAD.newIFADProjects();
 });
 
 
