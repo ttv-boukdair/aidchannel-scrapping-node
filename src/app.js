@@ -99,6 +99,7 @@ const CtrlUNDP = require("./controllers/scrappingUNDPController");
 const CtrlIFAD = require("./controllers/scrappingIFADController");
 const CtrlUSAID = require("./controllers/scrappingUSAIDIATIController");
 const CtrlUSAIDgov = require("./controllers/scrappingUSAIDgovController");
+const CtrlDAI = require("./controllers/scrappingDAIController");
 app.use("/uploads", express.static("uploads"));
 
 
@@ -183,6 +184,12 @@ CtrlEnabel.newEnabelProjects();
 cron.schedule("30 02 * * *", function () {
   console.log("update afdb");
   CtrlAFDB.newAFDBProjects();
+  
+});
+
+cron.schedule("30 03 * * *", function () {
+  console.log("update dai");
+  CtrlDAI.newProjects();
   
 });
 
