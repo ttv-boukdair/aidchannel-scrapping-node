@@ -174,7 +174,11 @@ cron.schedule("00 02 * * *", function () {
   CtrlWB.newWBProjects();
   
 });
-
+cron.schedule("00 04 * * *", function () {
+  console.log("update giz");
+  CtrlGIZ.newProjects()
+  
+});
 cron.schedule("30 01 * * *", function () {
   console.log("update Enabel");
 CtrlEnabel.newEnabelProjects();

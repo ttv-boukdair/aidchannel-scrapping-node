@@ -171,7 +171,7 @@ function giz_status_code(status) {
     //ongoing
     if (status.replace("\n", "") == "laufendes Projekt") return '2'
     //completed
-    if (status.replace("\n", "") == "Projekt beendet") return '3'
+    if (status.replace("\n", "") == "Projekt beendet") return '4'
     return null
 }
 
@@ -251,8 +251,8 @@ exports.getProjects = async(req, res, next) => {
         console.log(i);
         try {
 
-            const project = await getProjectInfo(i);
-
+            const project = await getProjectInfo(i); 
+            
             var tmp = await giz_aid_project(project)
             var project_data = tmp[0]
             var countries = tmp[1]
@@ -317,6 +317,8 @@ exports.newProjects = async(req, res, next) => {
         try {
             //get raw info using puppeteer
             const project = await getProjectInfo(i);
+            //skipp if closed 
+            if(giz_status_code(project.status) == '4') {console.log("skip closed"); continue}
             //get the project normalized info and the countries
             var tmp = await giz_aid_project(project)
             //project norm info
@@ -329,9 +331,9 @@ exports.newProjects = async(req, res, next) => {
             let proj_exists = await containsProject(project_data.proj_org_id)
             //if so break
             if (proj_exists) {
-                console.log("Exists!!!!! "+project_data.proj_org_id)
-                break
-
+                console.log("Exists!!!!!"+project_data.proj_org_id)
+                // console.log("Done!!!!!")
+                continue
 
             } 
             //else add new
@@ -340,23 +342,23 @@ exports.newProjects = async(req, res, next) => {
                 //if no country save without it
                 if (countries == null) {
                     project_to_save = new ProjectPreProd(project_data)
-                    project_to_save.save()
-                        //    console.log(project_data);
+                   // project_to_save.save()
+                           console.log(project_data);
                     continue
                 }
                 //if country list is empty save without it
                 if (countries.length == 0) {
                     project_to_save = new ProjectPreProd(project_data)
-                    project_to_save.save()
-                        //   console.log(project_data);
+                   // project_to_save.save()
+                          console.log(project_data);
                     continue
                 }
                 //save for all countries
                 for (let i = 0; i < countries.length; i++) {
                     project_data.country = countries[i]
                     project_to_save = new ProjectPreProd(project_data)
-                    project_to_save.save()
-                        //   console.log(project_data);
+                   // project_to_save.save()
+                          console.log(project_data);
                 }
             }
 
