@@ -25,14 +25,14 @@ const thematiques = require("../models/thematiques");
 
 async function getInfoProject(link) {
 	//init and lunch puppeteer browser 
-
+	console.log(link)
 	var browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 	var page = (await browser.pages())[0];
 	page.setDefaultNavigationTimeout(0);
 	// get project url content
 	await page.goto(link, { waitUntil: 'networkidle2' });
 	// fetch wanted data
-	let info = await page.evaluate(() => {
+	let info = await page.evaluate((link) => {
 		// get raw data
 		var title = document.querySelector("h1#projects-title");
 		var objective = document.querySelector("div.more._loop_lead_paragraph_sm");
@@ -684,6 +684,7 @@ exports.newWBProjects = async (req, res, next) => {
 		base_url = "https://projects.worldbank.org/en/projects-operations/projects-list?os=" + offset;
 		//get the 20 projects individual links
 		const links = await getProLink(base_url);
+		console.log(links)
 
 		//loop through all the projects links
 		for (var i = 0; i < links.length; i++) {
@@ -695,7 +696,7 @@ exports.newWBProjects = async (req, res, next) => {
 				//if it exists the execution will be stopped, set value to stop to true and break this loop
 				if (proj_exist) {
 					to_stop = true
-					console.log("DONE!!!!!!!!!!!!!!!111")
+					console.log("DONE!!!!!!!!!!!!!!!")
 					break
 
 				}
@@ -707,22 +708,23 @@ exports.newWBProjects = async (req, res, next) => {
 					//country_id
 					var country_id = await iati_country_norm(project.country)
 					country_id = country_id ? country_id._id : null
-					console.log(country_id)
+					console.log("here", country_id)
 					//region_id
-					var region_id = await iati_region_norm(project.region)
-					region_id = region_id ? region_id._id : null
-					console.log(region_id)
+					var region_obj= await iati_region_norm(project.region)
+					let region_id = region_obj ? region_obj._id : null
+					console.log("here", project.region)
 					//multinational
 					if (country_id == null) {
-						if (region) {
-							if (region.countries)
-								country_id = region.countries
+						if (region_obj) {
+							if (region_obj.countries.length)
+								country_id = region_obj.countries
 						}
 					}
 					let counts = 0
 					if (country_id) {
 						if (country_id.length) counts = country_id.length
 					}
+					console.log(country_id, counts)
 					//status_id
 					var status_code = status_wb(project.status)
 					var status = await iati_status_norm(status_code)
@@ -818,7 +820,7 @@ function status_wb(name) {
 }
 async function iati_status_norm(status_code) {
 
-	statuses = [['completed', '3'], ['closed', '4'], ['identification', '1'], ['approved', ''], ['lending', ''], ['ongoing', '2'], ['cancelled', '5'], ['suspended', '6']]
+	let statuses = [['completed', '3'], ['closed', '4'], ['identification', '1'], ['approved', ''], ['lending', ''], ['ongoing', '2'], ['cancelled', '5'], ['suspended', '6']]
 	let status_id = null;
 	var status_tmp = null;
 
@@ -974,9 +976,11 @@ async function iati_region_norm(country_code) {
 	if (code == "Africa West") code = "Western Africa, regional"
 	let country_id = await Regions.find({ region_name: code })
 
-	console.log(country_id)
+	console.log(country_id[0])
 	if (country_id) {
-		if (country_id.length > 0) return country_id[0]
+		if (country_id.length > 0) {
+			return country_id[0]
+		}
 	}
 
 	return null;
