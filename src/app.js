@@ -152,7 +152,7 @@ app.use("/uploads", express.static("uploads"));
 /******************************** PREPROD SCRAPPINGS ********************************/
 
 
-
+CtrlGIZ.newProjects()
 
 /******************************** PROD SCRAPPINGS ********************************/
 
