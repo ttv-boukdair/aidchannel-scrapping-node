@@ -706,3 +706,19 @@ exports.addProjectByExpert = async (req, res, next) => {
     res.status(500).json({ error: err });
   }
 };
+
+
+exports.status_auto_update = async (req, res, next) => {
+let ongoing = ["60c7672e97cf97698bbe1755",
+"60c7672e97cf97698bbe1753",
+"60c7672e97cf97698bbe1752",
+"60c7672e97cf97698bbe1754"]
+let closed='60c7672e97cf97698bbe1756'
+ let proj = await project.find({validation:1, status:{$in:ongoing},$or:[{planned_end:{$lte:new Date()}}, {actual_end:{$lte:new Date()}}]});
+for(let i=0; i<proj.length;i++)
+{
+  await project.updateOne({_id:proj[i]._id},{$set:{status:closed}})
+}
+
+  console.log("done", proj.length);
+};

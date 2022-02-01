@@ -26,7 +26,7 @@ const wbroutes = require("./routes/ScrappingWBRoute");
 const statusRoutes = require("./routes/statusRoute");
 const projectRoutes = require("./routes/projectRoute");
 
-
+const projectCrtl= require("./controllers/projectController");
 const newsRoute = require("./routes/newsRoute");
 const multimediaAPIRoutes = require("./routes/multimediaAPIRoute");
 const tweetRoute = require("./routes/tweetsRoute");
@@ -103,54 +103,7 @@ const CtrlDAI = require("./controllers/scrappingDAIController");
 app.use("/uploads", express.static("uploads"));
 
 
-//Scrapping Interruptions
-
-// cron.schedule("* * */14 * *", function () {
-//   console.log("update")
-//   CtrlIATI.scrapping();
-// });
-
-
-  // CtrlIATI.scrappingIATI();
-
-  
-
-// if (await CtrlIATI.interrupted()) {
-// CtrlIATI.scrappingIATI();}
-
-// CtrlAFDB.newAFDBProjects()
-// cron.schedule("30 19 * * 1", function (){
-// CtrlAFDB.putAFDBProjects();});
-
-// CtrlWB.newWBProjects();
-
-// CtrlUNDP.getUNDPProjects();
-// CtrlUNDP.newUNDPProjects();
-
-// CtrlWB.getWBProjects();
-// CtrlUSAIDgov.newUSAID()
-
-// CtrlGIZ.getProjects();
-// CtrlGIZ.newProjects()
-
-
-
-// cron.schedule("00 03 * * *", function () {
-//   console.log("update giz");
-//   CtrlGIZ.newProjects();
-  
-// });
-
-// cron.schedule("00 05 * * *", function () {
-//   console.log("update undp");
-//   CtrlUNDP.newUNDPProjects();
-// });
-// CtrlADB.newADBProjects();
-
-
-
 /******************************** PREPROD SCRAPPINGS ********************************/
-
 
 
 /******************************** PROD SCRAPPINGS ********************************/
@@ -210,5 +163,12 @@ cron.schedule("03 22 * * *", function () {
   CtrlIFAD.newIFADProjects();
 });
 
+
+/******************************** Periodic operations ********************************/
+
+cron.schedule("00 00 * * *", function () {
+  console.log("close projects");
+projectCrtl.status_auto_update()
+});
 
 module.exports = app;
