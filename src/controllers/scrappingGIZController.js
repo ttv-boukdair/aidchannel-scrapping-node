@@ -233,7 +233,9 @@ async function giz_aid_project(project) {
         sub_funder: sub_funder,
         objectives: objectives,
         total_cost: total_cost,
+        approval_date:new Date(actual_start),
         actual_start: new Date(actual_start),
+        planned_end: new Date(actual_end),
         actual_end: new Date(actual_end),
         raw_data_org: raw_data,
         project_url:"https://www.giz.de/projektdaten/projects.action?request_locale=en_GB&pn="+proj_org_id.replace(/\./g,'')

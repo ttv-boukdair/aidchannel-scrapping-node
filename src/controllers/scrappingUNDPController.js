@@ -71,7 +71,9 @@ async function undp_project(project) {
     funder: funder,
     sub_funder: sub_funder,
     implementer: implementer,
+    approval_date:actual_start,
     actual_start: actual_start,
+    planned_end:actual_end,
     actual_end: actual_end,
     raw_data_org: project
   }]

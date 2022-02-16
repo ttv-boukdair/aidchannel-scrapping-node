@@ -147,6 +147,7 @@ async function normProject(p){
         implementer:funder,
         status:"60c7672e97cf97698bbe1755",
         approval_date:p.date_d_octroi,
+        actual_start:p.date_d_octroi,
         total_cost:"Euro "+p.engagements_bruts_euro,
         budget:"Euro "+p.budget,
     thematique:thematique,

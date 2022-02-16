@@ -675,10 +675,10 @@ exports.getAFDBProjects = async (req, res, next) => {
         country:country[c],
         thematique:sector,
         total_cost:total_cost,
-        approval_date:approval_date,
-        actual_start:actual_start,
-        actual_end:actual_end,
-        planned_end:planned_end,
+        approval_date:approval_date?approval_date:actual_start,
+        actual_start:actual_start?actual_start:approval_date,
+        actual_end:actual_end?actual_end:planned_end,
+        planned_end:planned_end?planned_end:actual_end,
         task_manager:task_manager,
         translate_name:translate_name
       });
@@ -703,10 +703,10 @@ exports.getAFDBProjects = async (req, res, next) => {
         country:null,
         thematique:sector,
         total_cost:total_cost,
-        approval_date:approval_date,
-        actual_start:actual_start,
-        actual_end:actual_end,
-        planned_end:planned_end,
+        approval_date:approval_date?approval_date:actual_start,
+        actual_start:actual_start?actual_start:approval_date,
+        actual_end:actual_end?actual_end:planned_end,
+        planned_end:planned_end?planned_end:actual_end,
         task_manager:task_manager,
         translate_name:translate_name
       });

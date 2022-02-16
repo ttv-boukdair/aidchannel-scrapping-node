@@ -759,6 +759,8 @@ exports.newWBProjects = async (req, res, next) => {
 								thematique: thematique,
 								total_cost: project.total_cost,
 								approval_date: project.approval_date ? new Date(project.approval_date) : null,
+								actual_start:project.approval_date ? new Date(project.approval_date) : null,
+								actual_end:project.planned_end ? new Date(project.planned_end) : null,
 								planned_end: project.planned_end ? new Date(project.planned_end) : null,
 								maj_date: project.maj_date ? new Date(project.maj_date) : null,
 								raw_data_org: project.raw_data_org
@@ -787,6 +789,8 @@ exports.newWBProjects = async (req, res, next) => {
 							thematique: thematique,
 							total_cost: project.total_cost,
 							approval_date: project.approval_date ? new Date(project.approval_date) : null,
+							actual_start:project.approval_date ? new Date(project.approval_date) : null,
+							actual_end:project.planned_end ? new Date(project.planned_end) : null,
 							planned_end: project.planned_end ? new Date(project.planned_end) : null,
 							maj_date: project.maj_date ? new Date(project.maj_date) : null,
 							raw_data_org: project.raw_data_org
