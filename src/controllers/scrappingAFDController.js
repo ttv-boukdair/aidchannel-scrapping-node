@@ -20,6 +20,7 @@ const agent = new https.Agent({
 
 exports.newAFDProjects = async(req, res) => {
     const url = "https://opendata.afd.fr/api/records/1.0/search/?dataset=donnees-aide-au-developpement-afd&q=&sort=date_d_octroi&refine.pays_de_realisation=MAROC&refine.etat_du_projet=Exécution&lang=en&rows=2000";
+  // const url = "https://opendata.afd.fr/api/records/1.0/search/?dataset=donnees-aide-au-developpement-afd&q=&sort=date_d_octroi&refine.etat_du_projet=Exécution&lang=en&rows=2000";
     const projects = await axios.get(url);
     const dataset = projects.data.records;
     var count = dataset.length;
@@ -67,8 +68,8 @@ exports.newAFDProjects = async(req, res) => {
         } = dataset[i].fields;
         let proj_exists = await containsProject("https://opendata.afd.fr", id_projet)
         if (proj_exists) {
-            console.log("Done!!!!!!!!!");
-            break
+            console.log("Exists!!!!!!!!!");
+            continue
         };
         const data_model = {
             "datasetid": datasetid,
@@ -114,8 +115,11 @@ exports.newAFDProjects = async(req, res) => {
         };
 
         let proj = await normProject(data_model)
-        proj.save()
-        console.log(proj);
+        for(let j =0; j<proj.length;j++){
+          proj[j].save()
+        console.log(proj); 
+        }
+        
 
     }
 
@@ -126,37 +130,196 @@ exports.newAFDProjects = async(req, res) => {
 }
 
 function getIsoCode(c){
-    let dict = {'MAROC':'MA'}
-    return dict[c]
+    if(c == 'MULTI-PAYS') {
+        return [ 'MA',
+    'SN',
+    'MG',
+    'ML',
+    'NG',
+    'TN',
+    'BF',
+    'TD',
+    'PS',
+    'IC',
+    'CM',
+    'MR',
+    'BJ',
+    'GN',
+    'CD',
+    'CD',
+    'CF',
+    'KM',
+    'HT',
+    'LB',
+    'JO',
+    'VN',
+    'KH',
+    'ET',
+    'KE',
+    'TG',
+    'CG',
+    'DJ',
+    'EG',
+    'LA',
+    'MZ',
+    'CN',
+    'DO',
+    'TR',
+    'IN',
+    'TZ',
+    'CO',
+    'GH',
+    'MU',
+    'BD',
+    'UG',
+    'NG',
+    'BR',
+    'ID',
+    'BI',
+    'AM',
+    'MM',
+    'RW',
+    'SD',
+    'IQ',
+    'LR',
+    'MX',
+    'UZ',
+    'PH',
+    'ZA',
+    'EC',
+    'PE',
+    'LK',
+    'AO',
+    'BO',
+    'GA',
+    'GM',
+    'GE',
+    'GW',
+    'SR',
+    'VU',
+    'ZM',
+    'DZ',
+    'AR',
+    'AZ',
+    'CU',
+    'FJ',
+    'PK',
+    'ST',
+    'SO',
+    'ZW' ]
+}
+    let dict = {'MAROC':'MA',
+                'SENEGAL':'SN',
+                'MADAGASCAR':'MG',
+                'MALI':'ML',
+                'NIGER':'NG',
+                'TUNISIE':'TN',
+                'BURKINA FASO':'BF',
+                'TCHAD':'TD',
+                'TERRITOIRES AUTONOMES PALESTINIENS':'PS',
+                'COTE D\'IVOIRE':'IC',
+                'CAMEROUN':'CM',
+                'MAURITANIE':'MR',
+                'BENIN':'BJ',
+                'GUINEE':'GN',
+                'REPUBLIQUE DEMOCRATIQUE DU CONGO.':'CD',
+                'REPUBLIQUE DEMOCRATIQUE DU CONGO':'CD',
+                'CENTRAFRICAINE, REPUBLIQUE':'CF',
+                'COMORES':'KM',
+                'HAITI':'HT',
+                'LIBAN':'LB',
+                'JORDANIE':'JO',
+                'VIET-NAM':'VN',
+                'ROYAUME DU CAMBODGE':'KH',
+                'ETHIOPIE':'ET',
+                'KENYA':'KE',
+                'TOGO':'TG',
+                'CONGO':'CG',
+                'DJIBOUTI':'DJ',
+                'EGYPTE':'EG',
+                'LAOS, REPUBLIQUE DEMOCRATIQUE POPULAIRE':'LA',
+                'MOZAMBIQUE':'MZ',
+                'CHINE':'CN',
+                'DOMINICAINE,REPUBLIQUE':'DO',
+                'TURQUIE':'TR',
+                'INDE':'IN',
+                'TANZANIE, REPUBLIQUE UNIE':'TZ',
+                'COLOMBIE':'CO',
+                'GHANA':'GH',
+                'MAURICE':'MU',
+                'BANGLADESH':'BD',
+                'OUGANDA':'UG',
+                'NIGERIA':'NG',
+                'BRESIL':'BR',
+                'INDONESIE':'ID',
+                'BURUNDI':'BI',
+                'ARMENIE':'AM',
+                'BIRMANIE (MYANMAR)':'MM',
+                'RWANDA':'RW',
+                'SOUDAN':'SD',
+                'IRAQ':'IQ',
+                'LIBERIA':'LR',
+                'MEXIQUE':'MX',
+                'OUZBEKISTAN':'UZ',
+                'PHILIPPINES':'PH',
+                'AFRIQUE DU SUD':'ZA',
+                'EQUATEUR':'EC',
+                'PEROU':'PE',
+                'SRI LANKA':'LK',
+                'ANGOLA':'AO',
+                'BOLIVIE':'BO',
+                'GABON':'GA',
+                'GAMBIE':'GM',
+                'GEORGIE':'GE',
+                'GUINEE-BISSAU':'GW',
+                'SURINAME':'SR',
+                'VANUATU':'VU',
+                'ZAMBIE':'ZM',
+                'ALGERIE':'DZ',
+                'ARGENTINE':'AR',
+                'AZERBAIDJAN':'AZ',
+                'CUBA':'CU',
+                'FIDJI':'FJ',
+                'PAKISTAN':'PK',
+                'SAO-TOME-ET-PRINCIPE':'ST',
+                'SOMALIE':'SO',
+                'ZIMBABWE':'ZW'
+                }
+    return [dict[c]]
 }
 async function normProject(p){
     //get country
     const country_code = getIsoCode(p.pays_de_realisation)
-    let country = await Countries.findOne({code:country_code})
+    let country = await Countries.find({code:{$in:country_code}})
     //get funder
     let funder = await getFunder("Agence Française de Développement (AFD)")
     //sector
     let thematique = await getSector(p.libelle_secteur_economique_cad_5)
-    const proj = new Project({
-        source:"https://opendata.afd.fr",
-        proj_org_id:p.id_projet,
-        name:p.nom_du_projet_pour_les_instances,
-        description:p.description_du_projet,
-        country:country._id,
-        funder:funder,
-        implementer:funder,
-        status:"60c7672e97cf97698bbe1755",
-        approval_date:p.date_d_octroi,
-        actual_start:p.date_d_octroi,
-        total_cost:"Euro "+p.engagements_bruts_euro,
-        budget:"Euro "+p.budget,
-    thematique:thematique,
-    project_url:p.lien_fiche_projet,
-    raw_data_org:p,
-    maj_date:p.date_mise_a_jour_donnees_projet,
-    })
+    let projs = []
+    for(let i=0; i<country.length; i++){
+        const proj = new Project({
+            source:"https://opendata.afd.fr",
+            proj_org_id:p.id_projet,
+            name:p.nom_du_projet_pour_les_instances,
+            description:p.description_du_projet,
+            country:country[i]._id,
+            funder:funder,
+            implementer:funder,
+            status:"60c7672e97cf97698bbe1755",
+            approval_date:p.date_d_octroi,
+            actual_start:p.date_d_octroi,
+            total_cost:"Euro "+p.engagements_bruts_euro,
+            budget:"Euro "+p.budget,
+        thematique:thematique,
+        project_url:p.lien_fiche_projet,
+        raw_data_org:p,
+        maj_date:p.date_mise_a_jour_donnees_projet,
+        })
+        projs.push(proj)
+    }
 
-    return proj
+
+    return projs
 }
 
 async function getFunder(org) {

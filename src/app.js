@@ -104,7 +104,7 @@ app.use("/uploads", express.static("uploads"));
 
 
 /******************************** PREPROD SCRAPPINGS ********************************/
-
+CtrlAFD.newAFDProjects();
 
 /******************************** PROD SCRAPPINGS ********************************/
 
